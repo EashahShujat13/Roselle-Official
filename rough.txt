@@ -1,0 +1,115 @@
+
+
+mjjhy resetpassword/forgetpassword wala sb smjhna ah 
+✅ Backend
+✅ Signup
+✅ Login
+✅ Logout
+✅ JWT Authentication
+✅ Password Hashing (bcrypt)
+✅ Welcome Email
+✅ Forgot Password
+✅ Reset Password
+✅ Google Login
+✅ MongoDB Integration
+
+
+✅ Frontend
+✅ Login UI
+✅ Signup UI
+✅ Google Login
+✅ Forgot Password UI
+✅ Reset Password UI
+✅ Protected Flow
+✅ Luxury Theme
+
+
+
+error correction {
+    logout my error hay qnky ismy invalid token arha h
+    qnky shyd meny mmogodb sy iska token delet krdiya tha .
+}
+
+error solved!
+
+
+📦 Module 1
+Product Model
+
+↓
+
+Add Product API
+
+↓
+
+Get All Products
+
+↓
+
+Get Single Product
+
+↓
+
+Update Product
+
+↓
+
+Delete Product
+
+↓
+
+Search Product
+
+↓
+
+Filter Product
+
+↓
+
+Pagination
+
+↓
+
+Sorting
+
+↓
+
+Cloudinary Image Upload
+
+↓
+
+Admin Authorization
+
+Uske baad Cart, Wishlist, Orders bohot easy lagne lagenge.
+
+
+{sb hogya working perfectly bss ab ui bnani h product module ki}
+src/
+
+components/
+
+├── Navbar/
+│   ├── Navbar.jsx
+│   ├── Logo.jsx
+│   └── MobileMenu.jsx
+│
+├── Hero/
+│   └── Hero.jsx
+│
+├── Collections/
+│   ├── CollectionsPreview.jsx
+│   └── CollectionCard.jsx
+│
+├── Products/
+│   ├── FeaturedProducts.jsx
+│   ├── ProductCard.jsx      ⭐ Reusable
+│   └── ProductSkeleton.jsx  (baad me)
+│
+├── Shop/
+│   ├── SearchBar.jsx
+│   ├── CategoryFilter.jsx
+│   ├── SortDropdown.jsx
+│   └── ShopBanner.jsx
+│
+└── Footer/
+    └── Footer.jsx
