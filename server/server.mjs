@@ -4,6 +4,7 @@ import connectDB from './config/db.mjs';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.mjs';
 import productRoutes from './routes/productRoutes.mjs';
+import categoryRoutes from './routes/categoryRoutes.mjs';
 
 const app = express();
 app.use(express.json());
@@ -15,6 +16,8 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/product', productRoutes);
+app.use('/api/category', categoryRoutes);
+
  app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 })

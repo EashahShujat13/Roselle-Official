@@ -11,6 +11,9 @@ import {
   
 } from "../controllers/productController.mjs";
 
+import { getProductsByCategory } from '../controllers/categoryController.mjs';
+
+
 const router = express.Router();
 
 router.post("/add", addProduct);
@@ -24,6 +27,8 @@ router.delete("/:id", deleteProduct);
 router.get("/search", searchProducts);
 
 router.get("/featured", getFeaturedProducts);
+
+router.get("/category/:category", getProductsByCategory);
 
 router.get("/:id", getSingleProduct);
 
