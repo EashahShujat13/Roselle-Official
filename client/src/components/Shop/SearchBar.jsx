@@ -1,55 +1,71 @@
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 export default function SearchBar({
-
   keyword,
-
   setKeyword,
-
 }) {
-
   return (
+    <div className="
+      relative
+      w-full
+      sm:w-[280px]
+    ">
 
-    <div className="max-w-7xl mx-auto px-6 py-10">
-
-      <div className="relative">
-
-        <Search
-          className="
+      <Search
+        size={17}
+        className="
           absolute
-          left-5
+          left-4
           top-1/2
           -translate-y-1/2
-          text-gray-400
-          "
-        />
+          text-[#8A7A98]
+        "
+      />
 
-        <input
-          type="text"
-
-          value={keyword}
-
-          onChange={(e) => setKeyword(e.target.value)}
-
-          placeholder="Search Jewellery..."
-
-          className="
+      <input
+        type="text"
+        value={keyword}
+        onChange={(e) =>
+          setKeyword(e.target.value)
+        }
+        placeholder="Search jewellery..."
+        className="
           w-full
-          pl-14
-          pr-5
-          py-4
-          rounded-full
+          h-12
+          pl-11
+          pr-10
+          bg-white
           border
-          border-[#E6D9FF]
+          border-[#E4DAED]
           outline-none
+          text-sm
+          text-[#514064]
+          placeholder:text-[#AAA0B3]
           focus:border-[#B48CF0]
-          "
-        />
+          transition
+        "
+      />
 
-      </div>
+      {keyword && (
+        <button
+          type="button"
+          onClick={() =>
+            setKeyword("")
+          }
+          className="
+            absolute
+            right-3
+            top-1/2
+            -translate-y-1/2
+            text-[#8A7A98]
+            hover:text-[#514064]
+            transition
+          "
+        >
+          <X size={15} />
+        </button>
+      )}
 
     </div>
-
   );
-
 }

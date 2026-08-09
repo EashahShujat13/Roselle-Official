@@ -1,53 +1,61 @@
-export default function SortDropdown(){
+export default function SortDropdown({
+  sort,
+  setSort,
+}) {
+  return (
+    <div className="
+      flex
+      items-center
+      gap-3
+    ">
 
-return(
+      <span className="
+        uppercase
+        tracking-[2px]
+        text-[10px]
+        text-[#81768F]
+      ">
+        Sort
+      </span>
 
-<div
-className="
-max-w-7xl
-mx-auto
-px-6
-pb-10
-flex
-justify-end
-"
->
+      <select
+        value={sort}
+        onChange={(e) =>
+          setSort(e.target.value)
+        }
+        className="
+          min-w-[180px]
+          h-12
+          bg-white
+          border
+          border-[#DCCFE8]
+          px-4
+          text-sm
+          text-[#655B75]
+          outline-none
+          focus:border-[#B48CF0]
+          transition
+        "
+      >
 
-<select
+        <option value="default">
+          Featured
+        </option>
 
-className="
-border
-border-[#E6D9FF]
-rounded-full
-px-5
-py-3
-outline-none
-"
+        <option value="price-low">
+          Price: Low to High
+        </option>
 
->
+        <option value="price-high">
+          Price: High to Low
+        </option>
 
-<option>
+        <option value="name">
+          Name: A-Z
+        </option>
 
-Newest
+      </select>
 
-</option>
-
-<option>
-
-Price Low to High
-
-</option>
-
-<option>
-
-Price High to Low
-
-</option>
-
-</select>
-
-</div>
-
-)
-
+    </div>
+  );
 }

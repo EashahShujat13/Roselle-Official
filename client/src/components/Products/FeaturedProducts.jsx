@@ -1,165 +1,271 @@
 import { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
+import { ArrowUpRight, Heart } from "lucide-react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+
 import { getFeaturedProducts } from "../../config/apis/productApi";
 
 export default function FeaturedProducts() {
-
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getFeaturedProducts();
+
+        setProducts(response.products);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    try {
-
-      const response = await getFeaturedProducts();
-
-      setProducts(response.products);
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
-  };
-
   return (
-
-    <section className="py-24 bg-[#FCFAFF]">
+    <section className="bg-[#F5EFFA] py-28 md:py-36">
 
       <div className="max-w-7xl mx-auto px-6">
 
-        <div className="text-center mb-14">
+        {/* Heading */}
 
-          <p className="uppercase tracking-[5px] text-[#B48CF0]">
-            Featured
-          </p>
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 35,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.2,
+          }}
+          transition={{
+            duration: 0.8,
+          }}
+          className="
+            flex
+            flex-col
+            md:flex-row
+            md:items-end
+            md:justify-between
+            gap-8
+            mb-16
+          "
+        >
 
-          <h2
+          <div>
+
+            <p className="
+              uppercase
+              tracking-[6px]
+              text-[10px]
+              text-[#9B72D0]
+              mb-5
+            ">
+              The Roselle Edit
+            </p>
+
+            <h2 className="
+              font-['Cormorant_Garamond']
+              text-5xl
+              md:text-7xl
+              leading-[0.9]
+              text-[#514064]
+            ">
+              Pieces worth
+              <br />
+              <span className="italic">
+                remembering.
+              </span>
+            </h2>
+
+          </div>
+
+          <button
+            onClick={() => navigate("/shop")}
             className="
-            text-5xl
-            font-['Cormorant_Garamond']
-            text-[#5E4B7A]
-            mt-3
+              group
+              flex
+              items-center
+              gap-3
+              border-b
+              border-[#9B72D0]
+              pb-2
+              text-[#514064]
+              uppercase
+              tracking-[3px]
+              text-[10px]
+              w-fit
             "
           >
-            Featured Products
-          </h2>
+            Shop All
 
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-
-          {
-
-            products.map((product) => (
-
-              <div
-                key={product._id}
-                className="
-                bg-white
-                rounded-[30px]
-                overflow-hidden
-                shadow-sm
-                hover:shadow-xl
+            <ArrowUpRight
+              size={15}
+              className="
+                group-hover:rotate-45
+                transition-transform
                 duration-500
-                group
-                "
-              >
+              "
+            />
+          </button>
 
-                <div className="relative overflow-hidden">
+        </motion.div>
 
-                  <img
-                    src={
+
+        {/* Products */}
+
+        <div className="
+          grid
+          sm:grid-cols-2
+          lg:grid-cols-4
+          gap-7
+        ">
+
+          {products.map((product, index) => (
+
+            <motion.article
+              key={product._id}
+              initial={{
+                opacity: 0,
+                y: 50,
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+              }}
+              viewport={{
+                once: true,
+                amount: 0.15,
+              }}
+              transition={{
+                duration: 0.7,
+                delay: index * 0.1,
+              }}
+              className="group cursor-pointer"
+              onClick={() =>
+                navigate(`/product/${product._id}`)
+              }
+            >
+
+              <div className="
+                relative
+                overflow-hidden
+                bg-[#E4D7F0]
+                aspect-[4/5]
+              ">
+
+                <motion.img
+                  src={
                     product.images?.[0] ||
-                    "https://placehold.co/500x600?text=Roselle"
-}
-                    alt={product.productName}
-                    className="
+                    "https://placehold.co/600x750?text=Roselle"
+                  }
+                  alt={product.productName}
+                  whileHover={{
+                    scale: 1.07,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                  }}
+                  className="
                     w-full
-                    h-[320px]
+                    h-full
                     object-cover
-                    duration-500
-                    group-hover:scale-110
-                    "
-                  />
+                  "
+                />
 
-                  <button
-                    className="
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="
                     absolute
                     top-5
                     right-5
-                    bg-white
-                    p-2
+                    w-10
+                    h-10
                     rounded-full
-                    "
-                  >
-
-                    <Heart size={18} />
-
-                  </button>
-
-                </div>
-
-                <div className="p-6">
-
-                  <h3
-                    className="
-                    text-xl
-                    font-semibold
-                    text-[#5E4B7A]
-                    "
-                  >
-                    {product.productName}
-                  </h3>
-
-                  <p
-                    className="
-                    mt-3
-                    text-[#B48CF0]
-                    font-semibold
-                    "
-                  >
-                    Rs. {product.price}
-                  </p>
-
-                  <button
-                    onClick={() =>
-                      navigate(`/product/${product._id}`)
-                    }
-                    className="
-                    mt-6
-                    w-full
-                    py-3
-                    rounded-full
-                    border
-                    border-[#B48CF0]
+                    bg-white/95
+                    flex
+                    items-center
+                    justify-center
+                    text-[#514064]
                     hover:bg-[#B48CF0]
                     hover:text-white
-                    duration-300
-                    "
-                  >
-                    View Details
-                  </button>
+                    transition
+                  "
+                >
+                  <Heart size={17} />
+                </button>
 
+
+                <div className="
+                  absolute
+                  bottom-0
+                  left-0
+                  right-0
+                  bg-white/95
+                  translate-y-full
+                  group-hover:translate-y-0
+                  transition-transform
+                  duration-500
+                  py-4
+                  text-center
+                ">
+                  <span className="
+                    uppercase
+                    tracking-[3px]
+                    text-[9px]
+                    text-[#514064]
+                  ">
+                    View Details
+                  </span>
                 </div>
 
               </div>
 
-            ))
 
-          }
+              <div className="pt-5">
+
+                <p className="
+                  uppercase
+                  tracking-[3px]
+                  text-[9px]
+                  text-[#9B72D0]
+                ">
+                  {product.category}
+                </p>
+
+                <h3 className="
+                  mt-2
+                  font-['Cormorant_Garamond']
+                  text-2xl
+                  text-[#514064]
+                ">
+                  {product.productName}
+                </h3>
+
+                <p className="
+                  mt-2
+                  text-sm
+                  text-[#655b75]
+                ">
+                  Rs. {product.price}
+                </p>
+
+              </div>
+
+            </motion.article>
+
+          ))}
 
         </div>
 
       </div>
 
     </section>
-
   );
-
 }

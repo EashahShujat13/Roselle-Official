@@ -113,3 +113,20 @@ components/
 │
 └── Footer/
     └── Footer.jsx
+
+
+    Jab project complete ho jayega
+
+Tab hum ek alag branch bana kar project ko enterprise level par upgrade karenge.
+
+Usme seekhenge:
+
+✅ ObjectId
+✅ ref
+✅ populate()
+✅ Aggregation
+✅ Joins in MongoDB
+
+Ye sab interview-level concepts hain.
+
+sb hogya category k bss ui rehti h

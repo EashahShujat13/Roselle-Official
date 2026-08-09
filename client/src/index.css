@@ -7,3 +7,20 @@ box-sizing:border-box;
 body{
 background:#fff;
 }
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #fbf9fd;
+  color: #514463;
+  font-family: "Inter", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Cormorant Garamond", serif;
+}

@@ -1,96 +1,256 @@
-import { ArrowRight } from "lucide-react";
-import heroImg from "../assets/images/categories/cat3.jpeg"; // apni image ka name
+import { motion } from "framer-motion";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Hero() {
+  const navigate = useNavigate();
+
   return (
-    <section className="bg-[#FCFAFF]">
+    <section className="relative h-[90vh] min-h-[650px] overflow-hidden">
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-16 py-20">
+      {/* Background Image */}
 
-        <div className="grid lg:grid-cols-2 items-center gap-16">
+      <motion.img
+        initial={{ scale: 1.08 }}
+        animate={{ scale: 1 }}
+        transition={{
+          duration: 2,
+          ease: "easeOut",
+        }}
+        src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=2200&q=90"
+        alt="Roselle jewellery collection"
+        className="
+          absolute
+          inset-0
+          w-full
+          h-full
+          object-cover
+        "
+      />
 
-          {/* Left */}
+      {/* Luxury Overlay */}
 
-          <div>
+      <div className="
+        absolute
+        inset-0
+        bg-gradient-to-r
+        from-[#3D3150]/75
+        via-[#514064]/35
+        to-transparent
+      " />
 
-            <p className="
-            uppercase
-            tracking-[6px]
-            text-[#B48CF0]
-            text-sm
-            mb-5
-            ">
-              Luxury Jewellery
-            </p>
+      <div className="
+        absolute
+        inset-0
+        bg-gradient-to-t
+        from-[#3D3150]/55
+        via-transparent
+        to-transparent
+      " />
 
-            <h1 className="
-            text-5xl
-            lg:text-7xl
-            leading-tight
-            text-[#5E4B7A]
+
+      {/* Content */}
+
+      <div className="
+        relative
+        z-10
+        h-full
+        max-w-7xl
+        mx-auto
+        px-6
+        flex
+        items-center
+      ">
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 45,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 1,
+            delay: 0.4,
+            ease: "easeOut",
+          }}
+          className="max-w-2xl text-white"
+        >
+
+          <motion.p
+            initial={{ opacity: 0, letterSpacing: "1px" }}
+            animate={{
+              opacity: 1,
+              letterSpacing: "6px",
+            }}
+            transition={{
+              duration: 1,
+              delay: 0.7,
+            }}
+            className="
+              uppercase
+              text-[10px]
+              mb-6
+              text-[#E4D2F7]
+            "
+          >
+            Fine Jewellery · Est. 2026
+          </motion.p>
+
+
+          <h1 className="
             font-['Cormorant_Garamond']
-            ">
-              Timeless
-              <br />
-              Elegance
-            </h1>
+            text-6xl
+            sm:text-7xl
+            md:text-8xl
+            leading-[0.85]
+            font-medium
+          ">
+            Jewellery
+            <br />
+            <span className="italic">
+              with meaning.
+            </span>
+          </h1>
 
-            <p className="
-            mt-8
-            text-lg
-            text-[#7B6B91]
-            max-w-lg
-            leading-8
-            ">
-              Discover handcrafted jewellery
-              designed to celebrate every
-              beautiful moment with elegance
-              and luxury.
-            </p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              delay: 1,
+            }}
+            className="
+              mt-8
+              max-w-lg
+              text-sm
+              md:text-base
+              leading-7
+              text-white/80
+            "
+          >
+            Handcrafted pieces created to celebrate
+            individuality, colour and the moments that
+            become part of your story.
+          </motion.p>
+
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              delay: 1.2,
+            }}
+            className="
+              mt-9
+              flex
+              flex-wrap
+              gap-5
+            "
+          >
 
             <button
+              onClick={() => navigate("/shop")}
               className="
-              mt-10
-              flex
-              items-center
-              gap-3
-              bg-[#B48CF0]
-              text-white
-              px-8
-              py-4
-              rounded-full
-              hover:bg-[#9D70E8]
-              duration-300
+                group
+                flex
+                items-center
+                gap-3
+                bg-white
+                text-[#514064]
+                px-7
+                py-4
+                uppercase
+                tracking-[3px]
+                text-[10px]
+                hover:bg-[#B48CF0]
+                hover:text-white
+                transition-all
+                duration-500
               "
             >
-              Shop Collection
+              Explore Collection
 
-              <ArrowRight size={18} />
-
+              <ArrowUpRight
+                size={16}
+                className="
+                  group-hover:rotate-45
+                  transition-transform
+                  duration-500
+                "
+              />
             </button>
 
-          </div>
 
-          {/* Right */}
-
-          <div>
-
-            <img
-              src={heroImg}
-              alt="Jewellery"
+            <button
+              onClick={() => navigate("/collections")}
               className="
-              w-full
-              rounded-[40px]
-              object-cover
-              shadow-2xl
+                text-white
+                border-b
+                border-white/60
+                pb-2
+                uppercase
+                tracking-[3px]
+                text-[10px]
+                hover:border-white
+                transition
               "
-            />
+            >
+              Discover Roselle
+            </button>
 
-          </div>
+          </motion.div>
 
-        </div>
+        </motion.div>
 
       </div>
+
+
+      {/* Scroll Indicator */}
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{
+          delay: 1.8,
+          duration: 1,
+        }}
+        className="
+          absolute
+          bottom-8
+          left-1/2
+          -translate-x-1/2
+          text-white
+          flex
+          flex-col
+          items-center
+          gap-3
+        "
+      >
+
+        <span className="
+          text-[8px]
+          uppercase
+          tracking-[4px]
+        ">
+          Scroll
+        </span>
+
+        <motion.div
+          animate={{ y: [0, 7, 0] }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+          }}
+        >
+          <ArrowDown size={15} />
+        </motion.div>
+
+      </motion.div>
 
     </section>
   );
