@@ -205,6 +205,32 @@ export const googleLogin = async (req, res) => {
   }
 };
 
+export const getMyProfile = async (req, res) => {
+  try {
+    const user = await Users.findById(req.userId).select(
+      "-password -tokens -resetPasswordToken -resetPasswordExpire"
+    );
+
+    if (!user) {
+      return res.status(404).send({
+        message: "User not found",
+      });
+    }
+
+    res.send({
+      message: "Profile fetched successfully",
+      user,
+    });
+  } catch (e) {
+    console.log("PROFILE ERROR:", e);
+
+    res.status(500).send({
+      message: "Failed to fetch profile",
+      error: e.message,
+    });
+  }
+};
+
 export const logout =  async (req,res)=>{
     await Users.findByIdAndUpdate(req.userId, { $pull: { tokens: req.tokenToRemove } })
     res.send({message:'Logged Out Successfully'})

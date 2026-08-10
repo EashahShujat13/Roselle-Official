@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -8,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import bgImage from "../assets/images/banners/bouquetRing.jpg";
 import { useCart } from "../context/CartContext";
 
 export default function Cart() {
@@ -27,7 +28,7 @@ export default function Cart() {
 
   if (cart.length === 0) {
     return (
-      <main className="min-h-screen bg-[#FCFAFF]">
+      <main className="min-h-screen">
 
         <section className="relative overflow-hidden">
 
@@ -138,6 +139,7 @@ export default function Cart() {
                   gap-4
                 "
               >
+
                 <span className="w-12 h-px bg-[#CDB9E2]" />
 
                 <ShoppingBag
@@ -147,6 +149,7 @@ export default function Cart() {
                 />
 
                 <span className="w-12 h-px bg-[#CDB9E2]" />
+
               </div>
 
               <p
@@ -288,15 +291,31 @@ export default function Cart() {
   // =====================================================
 
   return (
-    <main className="min-h-screen bg-[#FCFAFF]">
+    <main className="min-h-screen">
 
       {/* =================================================
           CART HEADER
       ================================================= */}
 
-      <section className="relative overflow-hidden bg-[#F7F1FC]">
+      <section
+        className="
+          relative
+          overflow-hidden
+          bg-cover
+          bg-center
+          bg-no-repeat
+        "
+        style={{
+          backgroundImage:
+            `url('${bgImage}')`,
+        }}
+      >
 
-        {/* Soft decorative glow */}
+        {/* Image Overlay */}
+
+        <div className="absolute inset-0 bg-[#3F3155]/70" />
+
+        {/* Soft Decorative Glow */}
 
         <div
           className="
@@ -306,7 +325,7 @@ export default function Cart() {
             w-[420px]
             h-[420px]
             rounded-full
-            bg-[#D9C4F0]/35
+            bg-[#D9C4F0]/20
             blur-3xl
           "
         />
@@ -319,12 +338,12 @@ export default function Cart() {
             w-[450px]
             h-[450px]
             rounded-full
-            bg-[#E9DDF3]/60
+            bg-[#E9DDF3]/20
             blur-3xl
           "
         />
 
-        {/* Fine vertical detail */}
+        {/* Fine Vertical Detail */}
 
         <div
           className="
@@ -334,7 +353,7 @@ export default function Cart() {
             -translate-x-1/2
             w-px
             h-20
-            bg-[#B48CF0]/30
+            bg-[#D7B7FF]/40
           "
         />
 
@@ -385,14 +404,14 @@ export default function Cart() {
                 "
               >
 
-                <span className="w-10 h-px bg-[#B48CF0]" />
+                <span className="w-10 h-px bg-[#D7B7FF]" />
 
                 <p
                   className="
                     uppercase
                     tracking-[6px]
                     text-[9px]
-                    text-[#9B72D0]
+                    text-[#D7B7FF]
                   "
                 >
                   Roselle Jewellery
@@ -406,12 +425,13 @@ export default function Cart() {
                   text-6xl
                   md:text-8xl
                   leading-[0.8]
-                  text-[#514064]
+                  text-white
                 "
               >
                 Your
                 <br />
-                <span className="italic text-[#806298]">
+
+                <span className="italic text-[#E2C9FF]">
                   Collection.
                 </span>
               </h1>
@@ -422,7 +442,7 @@ export default function Cart() {
                   max-w-md
                   text-sm
                   leading-7
-                  text-[#81768D]
+                  text-white/75
                 "
               >
                 A curated selection of pieces chosen
@@ -447,7 +467,7 @@ export default function Cart() {
                 <ShoppingBag
                   size={17}
                   strokeWidth={1.2}
-                  className="text-[#9B72D0]"
+                  className="text-[#D7B7FF]"
                 />
 
                 <span
@@ -455,7 +475,7 @@ export default function Cart() {
                     uppercase
                     tracking-[3px]
                     text-[9px]
-                    text-[#756982]
+                    text-white/70
                   "
                 >
                   Your Selection
@@ -467,7 +487,7 @@ export default function Cart() {
                 className="
                   font-['Cormorant_Garamond']
                   text-4xl
-                  text-[#514064]
+                  text-white
                 "
               >
                 {cart.length}
@@ -477,7 +497,7 @@ export default function Cart() {
                     ml-2
                     text-xl
                     italic
-                    text-[#806298]
+                    text-[#E2C9FF]
                   "
                 >
                   {cart.length === 1
@@ -496,14 +516,14 @@ export default function Cart() {
                 "
               >
 
-                <span className="w-8 h-px bg-[#D1C0DF]" />
+                <span className="w-8 h-px bg-white/30" />
 
                 <span
                   className="
                     text-[9px]
                     uppercase
                     tracking-[2px]
-                    text-[#968BA0]
+                    text-white/60
                   "
                 >
                   Carefully selected
@@ -1124,3 +1144,4 @@ export default function Cart() {
     </main>
   );
 }
+

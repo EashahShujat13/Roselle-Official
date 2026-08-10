@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import {
   User,
@@ -7,96 +8,91 @@ import {
   Heart,
   ArrowRight,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import bgAuth from '../assets/images/auth/bgauth2.jpg';
+import { getMyProfile } from "../config/apis/authApi";
 
 export default function Profile() {
   const navigate = useNavigate();
 
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const token = localStorage.getItem("token");
 
-  // Decode JWT payload safely
-  const getUserFromToken = () => {
-    try {
-      if (!token) return null;
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
-      const payload = token.split(".")[1];
+      try {
+        const response = await getMyProfile(token);
+        setUser(response.user);
+      } catch (error) {
+        console.error("Profile Error:", error);
 
-      if (!payload) return null;
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/auth");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const decodedPayload = JSON.parse(
-        atob(
-          payload
-            .replace(/-/g, "+")
-            .replace(/_/g, "/")
-        )
-      );
-
-      return decodedPayload;
-    } catch (error) {
-      console.log("Token decode error:", error);
-      return null;
-    }
-  };
-
-  const user = getUserFromToken();
+    fetchProfile();
+  }, [token, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/auth");
   };
 
-  // If user is not logged in
-  if (!token) {
+  // Loading state
+  if (loading) {
     return (
-      <main className="min-h-screen bg-[#FCFAFF] flex items-center justify-center px-6">
+      <main className="min-h-screen bg-[#FAF7FD] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2
+            size={28}
+            className="animate-spin text-[#9B72D0]"
+            strokeWidth={1.5}
+          />
+
+          <p className="text-[10px] uppercase tracking-[4px] text-[#81768D]">
+            Loading your account
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  // Not logged in
+  if (!token || !user) {
+    return (
+      <main className="min-h-screen bg-[#FAF7FD] flex items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="text-center max-w-md"
         >
-          <div className="
-            mx-auto
-            w-16
-            h-16
-            rounded-full
-            bg-[#F1E8FA]
-            flex
-            items-center
-            justify-center
-            text-[#9B72D0]
-          ">
-            <User size={26} strokeWidth={1.5} />
-          </div>
-
-          <p className="
-            mt-7
-            uppercase
-            tracking-[6px]
-            text-[10px]
-            text-[#9B72D0]
-          ">
+          <p className="uppercase tracking-[6px] text-[10px] text-[#9B72D0]">
             Roselle
           </p>
 
-          <h1 className="
-            mt-4
-            font-['Cormorant_Garamond']
-            text-5xl
-            text-[#514064]
-          ">
+          <h1 className="mt-4 font-['Cormorant_Garamond'] text-5xl text-[#514064]">
             Welcome to Roselle
           </h1>
 
-          <p className="
-            mt-4
-            text-sm
-            leading-7
-            text-[#81768D]
-          ">
-            Sign in to view your account and manage
-            your Roselle experience.
+          <p className="mt-4 text-sm leading-7 text-[#81768D]">
+            Sign in to view your account and manage your Roselle
+            experience.
           </p>
 
           <button
@@ -126,143 +122,113 @@ export default function Profile() {
   }
 
   const displayName =
-    user?.fullname ||
-    user?.fullName ||
-    user?.name ||
+    user.fullname ||
+    user.fullName ||
+    user.name ||
     "Roselle Member";
 
-  const email =
-    user?.email ||
-    "Your account email";
+  const email = user.email || "Your account email";
+
+  const provider =
+    user.provider === "google"
+      ? "Google Account"
+      : "Roselle Account";
 
   return (
-    <main className="min-h-screen bg-[#FCFAFF]">
+    <main className="min-h-screen bg-[#FAF7FD]">
 
-      {/* HERO */}
+      {/* HERO / ACCOUNT BANNER */}
 
-      <section className="
-        relative
-        overflow-hidden
-        bg-[#F3ECFA]
-        py-24
-        md:py-28
-      ">
+      <section
+        className="
+          relative
+          overflow-hidden
+          py-24
+          md:py-32
+          bg-cover
+          bg-center
+        "
+        style={{
+          backgroundImage:
+            `url('${bgAuth}')`,
+        }}
+      >
+        {/* IMAGE OVERLAY */}
 
-        {/* Decorative circles */}
+        <div className="absolute inset-0 bg-[#3F3155]/65" />
 
-        <div className="
-          absolute
-          -top-32
-          -right-32
-          w-80
-          h-80
-          rounded-full
-          bg-[#DCC9F4]/40
-          blur-3xl
-        " />
+        {/* SOFT PURPLE GLOW */}
 
-        <div className="
-          absolute
-          -bottom-40
-          -left-32
-          w-96
-          h-96
-          rounded-full
-          bg-[#E8DCF5]/50
-          blur-3xl
-        " />
+        <div
+          className="
+            absolute
+            -top-32
+            -right-32
+            w-96
+            h-96
+            rounded-full
+            bg-[#DCC9F4]/20
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            absolute
+            -bottom-40
+            -left-32
+            w-96
+            h-96
+            rounded-full
+            bg-[#E8DCF5]/20
+            blur-3xl
+          "
+        />
+
+        {/* HERO CONTENT */}
 
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 30,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 0.8,
-          }}
-          className="
-            relative
-            max-w-7xl
-            mx-auto
-            px-6
-          "
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="relative max-w-7xl mx-auto px-6"
         >
-
-          <p className="
-            uppercase
-            tracking-[6px]
-            text-[10px]
-            text-[#9B72D0]
-          ">
+          <p className="uppercase tracking-[6px] text-[10px] text-[#D7B7FF]">
             Roselle
           </p>
 
-          <h1 className="
-            mt-5
-            font-['Cormorant_Garamond']
-            text-6xl
-            md:text-8xl
-            leading-none
-            text-[#514064]
-          ">
+          <h1
+            className="
+              mt-5
+              font-['Cormorant_Garamond']
+              text-6xl
+              md:text-8xl
+              leading-none
+              text-white
+            "
+          >
             My Account
           </h1>
 
-          <div className="
-            mt-7
-            w-14
-            h-px
-            bg-[#B48CF0]
-          " />
+          <div className="mt-7 w-14 h-px bg-[#D7B7FF]" />
 
-          <p className="
-            mt-5
-            text-sm
-            text-[#756982]
-          ">
+          <p className="mt-5 text-sm text-white/80">
             Welcome back, {displayName}.
           </p>
-
         </motion.div>
-
       </section>
-
 
       {/* ACCOUNT */}
 
-      <section className="
-        max-w-7xl
-        mx-auto
-        px-6
-        py-16
-        md:py-20
-      ">
-
-        <div className="
-          grid
-          lg:grid-cols-[1fr_0.65fr]
-          gap-10
-          lg:gap-16
-        ">
+      <section className="max-w-7xl mx-auto px-6 py-16 md:py-20">
+        <div className="grid lg:grid-cols-[1fr_0.65fr] gap-10 lg:gap-16">
 
           {/* USER CARD */}
 
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 30,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.7,
-            }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
             className="
               bg-white
               border
@@ -271,140 +237,119 @@ export default function Profile() {
               md:p-10
             "
           >
-
-            <div className="
-              flex
-              items-center
-              justify-between
-              gap-5
-              pb-8
-              border-b
-              border-[#E8E0EE]
-            ">
-
-              <div className="
+            <div
+              className="
                 flex
                 items-center
+                justify-between
                 gap-5
-              ">
-
-                <div className="
-                  w-16
-                  h-16
-                  rounded-full
-                  bg-[#F1E8FA]
-                  flex
-                  items-center
-                  justify-center
-                  text-[#9B72D0]
-                ">
-                  <User
-                    size={25}
-                    strokeWidth={1.5}
-                  />
+                pb-8
+                border-b
+                border-[#E8E0EE]
+              "
+            >
+              <div className="flex items-center gap-5">
+                <div
+                  className="
+                    w-16
+                    h-16
+                    rounded-full
+                    bg-[#F1E8FA]
+                    flex
+                    items-center
+                    justify-center
+                    text-[#9B72D0]
+                  "
+                >
+                  <User size={25} strokeWidth={1.5} />
                 </div>
 
                 <div>
-
-                  <p className="
-                    text-[9px]
-                    uppercase
-                    tracking-[3px]
-                    text-[#9B72D0]
-                  ">
+                  <p className="text-[9px] uppercase tracking-[3px] text-[#9B72D0]">
                     Member
                   </p>
 
-                  <h2 className="
-                    mt-1
-                    font-['Cormorant_Garamond']
-                    text-3xl
-                    text-[#514064]
-                  ">
+                  <h2
+                    className="
+                      mt-1
+                      font-['Cormorant_Garamond']
+                      text-3xl
+                      text-[#514064]
+                    "
+                  >
                     {displayName}
                   </h2>
-
                 </div>
-
               </div>
 
               <ShieldCheck
                 size={20}
                 className="text-[#B48CF0]"
               />
-
             </div>
-
 
             {/* EMAIL */}
 
-            <div className="
-              mt-8
-              flex
-              items-center
-              gap-4
-              p-5
-              bg-[#FAF7FD]
-              border
-              border-[#EEE6F4]
-            ">
-
-              <div className="
-                w-10
-                h-10
-                bg-[#F1E8FA]
+            <div
+              className="
+                mt-8
                 flex
                 items-center
-                justify-center
-                text-[#9B72D0]
-              ">
+                gap-4
+                p-5
+                bg-[#FAF7FD]
+                border
+                border-[#EEE6F4]
+              "
+            >
+              <div
+                className="
+                  w-10
+                  h-10
+                  bg-[#F1E8FA]
+                  flex
+                  items-center
+                  justify-center
+                  text-[#9B72D0]
+                "
+              >
                 <Mail size={17} />
               </div>
 
               <div>
-
-                <p className="
-                  text-[8px]
-                  uppercase
-                  tracking-[2px]
-                  text-[#9B72D0]
-                ">
+                <p className="text-[8px] uppercase tracking-[2px] text-[#9B72D0]">
                   Email Address
                 </p>
 
-                <p className="
-                  mt-1
-                  text-sm
-                  text-[#514064]
-                ">
+                <p className="mt-1 text-sm text-[#514064]">
                   {email}
                 </p>
-
               </div>
-
             </div>
 
+            {/* LOGIN METHOD */}
 
-            {/* ACCOUNT STATUS */}
-
-            <div className="
-              mt-4
-              flex
-              items-center
-              gap-4
-              p-5
-              border
-              border-[#EEE6F4]
-            ">
-
-              <div className="
-                w-10
-                h-10
-                bg-[#F7F1FC]
+            <div
+              className="
+                mt-4
                 flex
                 items-center
-                justify-center
-              ">
+                gap-4
+                p-5
+                border
+                border-[#EEE6F4]
+              "
+            >
+              <div
+                className="
+                  w-10
+                  h-10
+                  bg-[#F7F1FC]
+                  flex
+                  items-center
+                  justify-center
+                "
+              >
                 <ShieldCheck
                   size={17}
                   className="text-[#9B72D0]"
@@ -412,28 +357,55 @@ export default function Profile() {
               </div>
 
               <div>
+                <p className="text-[8px] uppercase tracking-[2px] text-[#9B72D0]">
+                  Sign In Method
+                </p>
 
-                <p className="
-                  text-[8px]
-                  uppercase
-                  tracking-[2px]
-                  text-[#9B72D0]
-                ">
+                <p className="mt-1 text-sm text-[#514064]">
+                  {provider}
+                </p>
+              </div>
+            </div>
+
+            {/* ACCOUNT STATUS */}
+
+            <div
+              className="
+                mt-4
+                flex
+                items-center
+                gap-4
+                p-5
+                border
+                border-[#EEE6F4]
+              "
+            >
+              <div
+                className="
+                  w-10
+                  h-10
+                  bg-[#F7F1FC]
+                  flex
+                  items-center
+                  justify-center
+                "
+              >
+                <ShieldCheck
+                  size={17}
+                  className="text-[#9B72D0]"
+                />
+              </div>
+
+              <div>
+                <p className="text-[8px] uppercase tracking-[2px] text-[#9B72D0]">
                   Account Status
                 </p>
 
-                <p className="
-                  mt-1
-                  text-sm
-                  text-[#514064]
-                ">
+                <p className="mt-1 text-sm text-[#514064]">
                   Active & Secure
                 </p>
-
               </div>
-
             </div>
-
 
             {/* LOGOUT */}
 
@@ -461,50 +433,31 @@ export default function Profile() {
               <LogOut size={15} />
               Sign Out
             </button>
-
           </motion.div>
-
 
           {/* QUICK LINKS */}
 
           <motion.div
-            initial={{
-              opacity: 0,
-              x: 30,
-            }}
-            animate={{
-              opacity: 1,
-              x: 0,
-            }}
-            transition={{
-              duration: 0.7,
-              delay: 0.1,
-            }}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
           >
-
-            <p className="
-              uppercase
-              tracking-[5px]
-              text-[10px]
-              text-[#9B72D0]
-            ">
+            <p className="uppercase tracking-[5px] text-[10px] text-[#9B72D0]">
               Your Roselle
             </p>
 
-            <h2 className="
-              mt-3
-              font-['Cormorant_Garamond']
-              text-4xl
-              text-[#514064]
-            ">
+            <h2
+              className="
+                mt-3
+                font-['Cormorant_Garamond']
+                text-4xl
+                text-[#514064]
+              "
+            >
               Explore your account
             </h2>
 
-
-            <div className="
-              mt-8
-              space-y-4
-            ">
+            <div className="mt-8 space-y-4">
 
               {/* ORDERS */}
 
@@ -525,13 +478,7 @@ export default function Profile() {
                   transition
                 "
               >
-
-                <div className="
-                  flex
-                  items-center
-                  gap-5
-                ">
-
+                <div className="flex items-center gap-5">
                   <ShoppingBag
                     size={20}
                     strokeWidth={1.5}
@@ -539,25 +486,14 @@ export default function Profile() {
                   />
 
                   <div>
-
-                    <h3 className="
-                      font-['Cormorant_Garamond']
-                      text-2xl
-                      text-[#514064]
-                    ">
+                    <h3 className="font-['Cormorant_Garamond'] text-2xl text-[#514064]">
                       My Orders
                     </h3>
 
-                    <p className="
-                      mt-1
-                      text-xs
-                      text-[#81768D]
-                    ">
+                    <p className="mt-1 text-xs text-[#81768D]">
                       View your jewellery orders.
                     </p>
-
                   </div>
-
                 </div>
 
                 <ArrowRight
@@ -568,9 +504,7 @@ export default function Profile() {
                     transition
                   "
                 />
-
               </button>
-
 
               {/* WISHLIST */}
 
@@ -591,13 +525,7 @@ export default function Profile() {
                   transition
                 "
               >
-
-                <div className="
-                  flex
-                  items-center
-                  gap-5
-                ">
-
+                <div className="flex items-center gap-5">
                   <Heart
                     size={20}
                     strokeWidth={1.5}
@@ -605,25 +533,14 @@ export default function Profile() {
                   />
 
                   <div>
-
-                    <h3 className="
-                      font-['Cormorant_Garamond']
-                      text-2xl
-                      text-[#514064]
-                    ">
+                    <h3 className="font-['Cormorant_Garamond'] text-2xl text-[#514064]">
                       Wishlist
                     </h3>
 
-                    <p className="
-                      mt-1
-                      text-xs
-                      text-[#81768D]
-                    ">
+                    <p className="mt-1 text-xs text-[#81768D]">
                       Keep your favourite pieces close.
                     </p>
-
                   </div>
-
                 </div>
 
                 <ArrowRight
@@ -634,9 +551,7 @@ export default function Profile() {
                     transition
                   "
                 />
-
               </button>
-
 
               {/* SHOP */}
 
@@ -657,25 +572,14 @@ export default function Profile() {
                   transition
                 "
               >
-
                 <div>
-
-                  <h3 className="
-                    font-['Cormorant_Garamond']
-                    text-2xl
-                    text-[#514064]
-                  ">
+                  <h3 className="font-['Cormorant_Garamond'] text-2xl text-[#514064]">
                     Continue Shopping
                   </h3>
 
-                  <p className="
-                    mt-1
-                    text-xs
-                    text-[#81768D]
-                  ">
+                  <p className="mt-1 text-xs text-[#81768D]">
                     Discover your next Roselle piece.
                   </p>
-
                 </div>
 
                 <ArrowRight
@@ -686,55 +590,27 @@ export default function Profile() {
                     transition
                   "
                 />
-
               </button>
 
             </div>
-
           </motion.div>
-
         </div>
-
       </section>
 
+      {/* BRAND STRIP */}
 
-      {/* BOTTOM BRAND STRIP */}
-
-      <section className="
-        border-y
-        border-[#E7DFF0]
-        bg-white
-      ">
-
-        <div className="
-          max-w-7xl
-          mx-auto
-          px-6
-          py-14
-          text-center
-        ">
-
-          <p className="
-            font-['Cormorant_Garamond']
-            text-3xl
-            md:text-4xl
-            text-[#514064]
-          ">
+      <section className="border-y border-[#E7DFF0] bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-14 text-center">
+          <p className="font-['Cormorant_Garamond'] text-3xl md:text-4xl text-[#514064]">
             Jewellery that becomes part of your story.
           </p>
 
-          <p className="
-            mt-3
-            text-xs
-            text-[#81768D]
-          ">
+          <p className="mt-3 text-xs text-[#81768D]">
             Roselle — thoughtfully made, beautifully yours.
           </p>
-
         </div>
-
       </section>
-
     </main>
   );
 }
+

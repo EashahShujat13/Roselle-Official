@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+import bgImage from "../../assets/images/banners/bracelet.jpg";
 export default function BeadsEditorial() {
   const navigate = useNavigate();
 
@@ -125,7 +125,7 @@ export default function BeadsEditorial() {
           >
 
             <motion.img
-              src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=1600&q=90"
+              src={bgImage}
               alt="Handmade beads jewellery"
               whileHover={{
                 scale: 1.03,

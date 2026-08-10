@@ -1,3 +1,4 @@
+
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -42,12 +43,24 @@ export default function CollectionsPreview() {
     },
   ];
 
-  return (
-    <section className="bg-[#EDE3F7] py-28 md:py-36">
+  // ==================================================
+  // OPEN CATEGORY
+  // Same behavior as CategoryNav
+  // ==================================================
 
+  const openCategory = (categoryName) => {
+    navigate(
+      `/shop?category=${encodeURIComponent(categoryName)}`
+    );
+  };
+
+  return (
+    <section>
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Heading */}
+        {/* ==================================================
+            HEADING
+        ================================================== */}
 
         <motion.div
           variants={reveal}
@@ -102,8 +115,9 @@ export default function CollectionsPreview() {
           </p>
         </motion.div>
 
-
-        {/* Collections */}
+        {/* ==================================================
+            COLLECTIONS
+        ================================================== */}
 
         <div
           className="
@@ -113,9 +127,7 @@ export default function CollectionsPreview() {
             md:gap-8
           "
         >
-
           {collections.map((collection, index) => (
-
             <motion.div
               key={collection.title}
               initial={{
@@ -134,7 +146,9 @@ export default function CollectionsPreview() {
                 duration: 0.8,
                 delay: index * 0.12,
               }}
-              onClick={() => navigate("/shop")}
+              onClick={() =>
+                openCategory(collection.title)
+              }
               className={`
                 group
                 cursor-pointer
@@ -142,7 +156,9 @@ export default function CollectionsPreview() {
               `}
             >
 
-              {/* Image */}
+              {/* ==================================================
+                  IMAGE
+              ================================================== */}
 
               <div
                 className="
@@ -152,7 +168,6 @@ export default function CollectionsPreview() {
                   aspect-[4/5]
                 "
               >
-
                 <motion.img
                   src={collection.image}
                   alt={collection.title}
@@ -170,7 +185,7 @@ export default function CollectionsPreview() {
                   "
                 />
 
-                {/* Image overlay */}
+                {/* IMAGE OVERLAY */}
 
                 <div
                   className="
@@ -183,7 +198,7 @@ export default function CollectionsPreview() {
                   "
                 />
 
-                {/* Number */}
+                {/* NUMBER */}
 
                 <span
                   className="
@@ -198,7 +213,7 @@ export default function CollectionsPreview() {
                   0{index + 1}
                 </span>
 
-                {/* Arrow */}
+                {/* ARROW */}
 
                 <motion.div
                   whileHover={{
@@ -221,11 +236,11 @@ export default function CollectionsPreview() {
                 >
                   <ArrowUpRight size={18} />
                 </motion.div>
-
               </div>
 
-
-              {/* Text */}
+              {/* ==================================================
+                  TEXT
+              ================================================== */}
 
               <div className="pt-6">
 
@@ -251,15 +266,13 @@ export default function CollectionsPreview() {
                 </p>
 
               </div>
-
             </motion.div>
-
           ))}
-
         </div>
 
-
-        {/* View All */}
+        {/* ==================================================
+            VIEW ALL
+        ================================================== */}
 
         <motion.div
           initial={{
@@ -282,9 +295,8 @@ export default function CollectionsPreview() {
             justify-center
           "
         >
-
           <button
-            onClick={() => navigate("/collections")}
+            onClick={() => navigate("/shop")}
             className="
               group
               flex
@@ -312,11 +324,10 @@ export default function CollectionsPreview() {
               "
             />
           </button>
-
         </motion.div>
 
       </div>
-
     </section>
   );
 }
+

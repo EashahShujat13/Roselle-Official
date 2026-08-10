@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import bgImage from "../assets/images/banners/bouquetRing.jpg";
 export default function Hero() {
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ export default function Hero() {
           duration: 2,
           ease: "easeOut",
         }}
-        src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=2200&q=90"
+        src={bgImage}
         alt="Roselle jewellery collection"
         className="
           absolute

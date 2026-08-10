@@ -43,15 +43,28 @@ export const loginUser = async (loginData) => {
   return response.data;
 };
 
-export const googleLoginUser = async (data) => {
 
-  const response = await api.post(
-    "/google-login",
+
+export const googleLoginUser = async (data) => {
+  const response = await axiosInstance.post(
+    "/auth/google-login",
     data
   );
 
   return response.data;
+};
 
+export const getMyProfile = async (token) => {
+  const response = await axiosInstance.get(
+    "/auth/profile",
+    {
+      headers: {
+        Authorization: token,
+      },
+    }
+  );
+
+  return response.data;
 };
 
 export const logoutUser = async (token) => {

@@ -7,6 +7,7 @@ import SingleProduct from "../pages/SingleProduct";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Profile from "../pages/Profile";
+import Wishlist from "../pages/Wishlist";
 import ResetPassword from "../pages/ResetPassword";
 
 export default function AppRoutes() {
@@ -45,6 +46,11 @@ export default function AppRoutes() {
       <Route
        path="/profile"
        element={<Profile />}
+      />
+
+      <Route 
+        path="/wishlist"
+         element={<Wishlist />}
       />
 
       
