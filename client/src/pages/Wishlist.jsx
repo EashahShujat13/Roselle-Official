@@ -1,66 +1,239 @@
-
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
   ShoppingBag,
   Trash2,
   ArrowRight,
   Sparkles,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+
 import bgImage from "../assets/images/banners/ringImg.jpg";
+
+import {
+  getMyWishlist,
+  removeFromWishlist,
+} from "../config/apis/wishlistApi";
+
+import { useCart } from "../context/CartContext";
 
 export default function Wishlist() {
   const navigate = useNavigate();
 
-  // STATIC DATA
-  // Later this will come from Redux / API
-  const [wishlistItems, setWishlistItems] = useState([
-    {
-      id: 1,
-      name: "Luna Pearl Necklace",
-      category: "Necklaces",
-      price: "Rs. 4,500",
-      image:
-        "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=900&q=85",
-    },
-    {
-      id: 2,
-      name: "Élan Gold Earrings",
-      category: "Earrings",
-      price: "Rs. 3,200",
-      image:
-        "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=900&q=85",
-    },
-    {
-      id: 3,
-      name: "Amour Bracelet",
-      category: "Bracelets",
-      price: "Rs. 3,800",
-      image:
-        "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=900&q=85",
-    },
-    {
-      id: 4,
-      name: "Celeste Ring",
-      category: "Rings",
-      price: "Rs. 2,900",
-      image:
-        "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=900&q=85",
-    },
-  ]);
+  const { addToCart } = useCart();
 
-  const removeFromWishlist = (id) => {
-    setWishlistItems((items) =>
-      items.filter((item) => item.id !== id)
-    );
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [removingId, setRemovingId] = useState(null);
+  const [addingId, setAddingId] = useState(null);
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  /*
+   * FETCH WISHLIST
+   */
+  const fetchWishlist = async () => {
+    if (!token) {
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await getMyWishlist(token);
+
+      setWishlistItems(response?.wishlist?.products || []);
+    } catch (error) {
+      console.error("Wishlist Fetch Error:", error);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        navigate("/auth");
+        return;
+      }
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to load your wishlist."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
+  /*
+   * LOAD WISHLIST
+   */
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
+
+  /*
+   * REMOVE FROM WISHLIST
+   */
+  const handleRemove = async (productId) => {
+    if (!token || removingId) {
+      return;
+    }
+
+    try {
+      setRemovingId(productId);
+      setError("");
+
+      await removeFromWishlist(productId, token);
+
+      setWishlistItems((items) =>
+        items.filter(
+          (item) => item._id !== productId
+        )
+      );
+    } catch (error) {
+      console.error("Remove Wishlist Error:", error);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        navigate("/auth");
+        return;
+      }
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to remove this piece."
+      );
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
+  /*
+   * ADD TO CART
+   */
+  const handleAddToCart = async (product) => {
+    if (!product?._id || addingId) {
+      return;
+    }
+
+    try {
+      setAddingId(product._id);
+
+      /*
+       * Existing CartContext handles cart state.
+       */
+      addToCart(product);
+
+    } catch (error) {
+      console.error("Add To Cart Error:", error);
+    } finally {
+      setTimeout(() => {
+        setAddingId(null);
+      }, 500);
+    }
+  };
+
+  /*
+   * LOGIN PROTECTION
+   */
+  if (!token) {
+    return (
+      <main className="min-h-screen bg-[#FAF7FD] flex items-center justify-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md text-center"
+        >
+          <Heart
+            size={42}
+            strokeWidth={1}
+            className="mx-auto text-[#9B72D0]"
+          />
+
+          <p className="mt-7 uppercase tracking-[5px] text-[10px] text-[#9B72D0]">
+            Roselle
+          </p>
+
+          <h1
+            className="
+              mt-3
+              font-['Cormorant_Garamond']
+              text-5xl
+              text-[#514064]
+            "
+          >
+            Your Wishlist
+          </h1>
+
+          <p className="mt-4 text-sm leading-7 text-[#81768D]">
+            Please login to view the pieces you have saved.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/auth")}
+            className="
+              mt-8
+              inline-flex
+              items-center
+              gap-3
+              bg-[#5E4B7A]
+              px-8
+              py-4
+              text-white
+              uppercase
+              tracking-[3px]
+              text-[10px]
+              hover:bg-[#806298]
+              transition
+            "
+          >
+            Login
+            <ArrowRight size={15} />
+          </button>
+        </motion.div>
+      </main>
+    );
+  }
+
+  /*
+   * LOADING
+   */
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#FAF7FD] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <Loader2
+            size={28}
+            strokeWidth={1.5}
+            className="animate-spin text-[#9B72D0]"
+          />
+
+          <p className="text-[10px] uppercase tracking-[4px] text-[#81768D]">
+            Loading your wishlist
+          </p>
+        </motion.div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#FAF7FD]">
 
-      {/* HERO / WISHLIST BANNER */}
+      {/* =====================================================
+          HERO
+      ===================================================== */}
 
       <section
         className="
@@ -72,8 +245,7 @@ export default function Wishlist() {
           md:py-32
         "
         style={{
-          backgroundImage:
-            `url('${bgImage}')`,
+          backgroundImage: `url('${bgImage}')`,
         }}
       >
         {/* Overlay */}
@@ -134,7 +306,9 @@ export default function Wishlist() {
         </motion.div>
       </section>
 
-      {/* WISHLIST CONTENT */}
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
 
       <section className="max-w-7xl mx-auto px-6 py-16 md:py-20">
 
@@ -172,18 +346,67 @@ export default function Wishlist() {
             </h2>
           </div>
 
-          <p className="text-xs text-[#81768D]">
-            {wishlistItems.length}{" "}
-            {wishlistItems.length === 1 ? "piece" : "pieces"} saved
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-[#81768D]">
+              {wishlistItems.length}{" "}
+              {wishlistItems.length === 1
+                ? "piece"
+                : "pieces"}{" "}
+              saved
+            </p>
+
+            <button
+              type="button"
+              onClick={fetchWishlist}
+              className="
+                w-9
+                h-9
+                border
+                border-[#DCCFE8]
+                flex
+                items-center
+                justify-center
+                text-[#806298]
+                hover:bg-[#F1E8FA]
+                transition
+              "
+              aria-label="Refresh wishlist"
+            >
+              <RefreshCw size={13} />
+            </button>
+          </div>
         </motion.div>
 
-        {/* EMPTY STATE */}
+        {/* ERROR */}
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="
+              mb-8
+              border
+              border-red-200
+              bg-red-50
+              px-5
+              py-4
+              text-sm
+              text-red-500
+            "
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {/* =================================================
+            EMPTY STATE
+        ================================================= */}
 
         {wishlistItems.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="
               border
               border-[#E5DCEA]
@@ -232,6 +455,7 @@ export default function Wishlist() {
             </p>
 
             <button
+              type="button"
               onClick={() => navigate("/shop")}
               className="
                 mt-8
@@ -255,198 +479,303 @@ export default function Wishlist() {
           </motion.div>
         ) : (
 
-          /* PRODUCT GRID */
+          /* =================================================
+             PRODUCT GRID
+          ================================================= */
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            {wishlistItems.map((item, index) => (
-              <motion.article
-                key={item.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.6,
-                  delay: index * 0.08,
-                }}
-                className="
-                  group
-                  bg-white
-                  border
-                  border-[#E5DCEA]
-                  overflow-hidden
-                "
-              >
+            <AnimatePresence mode="popLayout">
+              {wishlistItems.map((item, index) => {
 
-                {/* IMAGE */}
+                const productId = item._id;
 
-                <div className="relative aspect-[4/5] overflow-hidden bg-[#F3ECFA]">
+                const image =
+                  item.images?.[0] ||
+                  "https://placehold.co/600x750/F3ECFA/5E4B7A?text=Roselle";
 
-                  <img
-                    src={item.image}
-                    alt={item.name}
+                const price = Number(
+                  item.price || 0
+                );
+
+                return (
+                  <motion.article
+                    key={productId}
+                    layout
+                    initial={{
+                      opacity: 0,
+                      y: 30,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.94,
+                      y: -10,
+                    }}
+                    transition={{
+                      duration: 0.5,
+                      delay: index * 0.06,
+                    }}
                     className="
-                      w-full
-                      h-full
-                      object-cover
-                      transition
-                      duration-700
-                      group-hover:scale-105
-                    "
-                  />
-
-                  {/* IMAGE OVERLAY */}
-
-                  <div
-                    className="
-                      absolute
-                      inset-0
-                      bg-[#3F3155]/0
-                      group-hover:bg-[#3F3155]/10
-                      transition
-                      duration-500
-                    "
-                  />
-
-                  {/* REMOVE BUTTON */}
-
-                  <button
-                    onClick={() =>
-                      removeFromWishlist(item.id)
-                    }
-                    aria-label={`Remove ${item.name} from wishlist`}
-                    className="
-                      absolute
-                      top-4
-                      right-4
-                      w-10
-                      h-10
-                      bg-white/95
-                      flex
-                      items-center
-                      justify-center
-                      text-[#9B72D0]
-                      opacity-0
-                      translate-y-2
-                      group-hover:opacity-100
-                      group-hover:translate-y-0
-                      transition
-                      duration-300
-                      hover:bg-[#5E4B7A]
-                      hover:text-white
+                      group
+                      bg-white
+                      border
+                      border-[#E5DCEA]
+                      overflow-hidden
                     "
                   >
-                    <Trash2 size={15} strokeWidth={1.5} />
-                  </button>
 
-                  {/* SAVED BADGE */}
+                    {/* IMAGE */}
 
-                  <div
-                    className="
-                      absolute
-                      left-4
-                      top-4
-                      bg-white/90
-                      px-3
-                      py-2
-                    "
-                  >
-                    <div className="flex items-center gap-2">
-                      <Heart
-                        size={11}
-                        fill="currentColor"
-                        className="text-[#9B72D0]"
+                    <div className="
+                      relative
+                      aspect-[4/5]
+                      overflow-hidden
+                      bg-[#F3ECFA]
+                    ">
+
+                      <img
+                        src={image}
+                        alt={item.productName || "Roselle jewellery"}
+                        className="
+                          w-full
+                          h-full
+                          object-cover
+                          transition
+                          duration-700
+                          group-hover:scale-105
+                        "
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            "https://placehold.co/600x750/F3ECFA/5E4B7A?text=Roselle";
+                        }}
                       />
 
-                      <span className="text-[8px] uppercase tracking-[2px] text-[#665875]">
-                        Saved
-                      </span>
+                      {/* IMAGE OVERLAY */}
+
+                      <div
+                        className="
+                          absolute
+                          inset-0
+                          bg-[#3F3155]/0
+                          group-hover:bg-[#3F3155]/10
+                          transition
+                          duration-500
+                        "
+                      />
+
+                      {/* REMOVE */}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRemove(productId)
+                        }
+                        disabled={
+                          removingId === productId
+                        }
+                        aria-label={`Remove ${
+                          item.productName || "product"
+                        } from wishlist`}
+                        className="
+                          absolute
+                          top-4
+                          right-4
+                          w-10
+                          h-10
+                          bg-white/95
+                          flex
+                          items-center
+                          justify-center
+                          text-[#9B72D0]
+                          opacity-0
+                          translate-y-2
+                          group-hover:opacity-100
+                          group-hover:translate-y-0
+                          transition
+                          duration-300
+                          hover:bg-[#5E4B7A]
+                          hover:text-white
+                          disabled:opacity-60
+                        "
+                      >
+                        {removingId === productId ? (
+                          <Loader2
+                            size={15}
+                            className="animate-spin"
+                          />
+                        ) : (
+                          <Trash2
+                            size={15}
+                            strokeWidth={1.5}
+                          />
+                        )}
+                      </button>
+
+                      {/* SAVED BADGE */}
+
+                      <div
+                        className="
+                          absolute
+                          left-4
+                          top-4
+                          bg-white/90
+                          px-3
+                          py-2
+                        "
+                      >
+                        <div className="flex items-center gap-2">
+
+                          <Heart
+                            size={11}
+                            fill="currentColor"
+                            className="text-[#9B72D0]"
+                          />
+
+                          <span className="
+                            text-[8px]
+                            uppercase
+                            tracking-[2px]
+                            text-[#665875]
+                          ">
+                            Saved
+                          </span>
+
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* PRODUCT INFO */}
+                    {/* PRODUCT INFO */}
 
-                <div className="p-5">
+                    <div className="p-5">
 
-                  <p className="text-[8px] uppercase tracking-[3px] text-[#9B72D0]">
-                    {item.category}
-                  </p>
+                      <p className="
+                        text-[8px]
+                        uppercase
+                        tracking-[3px]
+                        text-[#9B72D0]
+                      ">
+                        {item.category || "Roselle"}
+                      </p>
 
-                  <h3
-                    className="
-                      mt-2
-                      font-['Cormorant_Garamond']
-                      text-2xl
-                      text-[#514064]
-                    "
-                  >
-                    {item.name}
-                  </h3>
+                      <h3
+                        className="
+                          mt-2
+                          font-['Cormorant_Garamond']
+                          text-2xl
+                          text-[#514064]
+                          line-clamp-1
+                        "
+                      >
+                        {item.productName || "Roselle Piece"}
+                      </h3>
 
-                  <div className="mt-4 flex items-center justify-between">
-
-                    <p className="text-sm text-[#665875]">
-                      {item.price}
-                    </p>
-
-                    <button
-                      onClick={() => navigate("/shop")}
-                      className="
+                      <div className="
+                        mt-4
                         flex
                         items-center
-                        gap-2
-                        text-[9px]
-                        uppercase
-                        tracking-[2px]
-                        text-[#9B72D0]
-                        hover:text-[#514064]
-                        transition
-                      "
-                    >
-                      View
-                      <ArrowRight size={13} />
-                    </button>
+                        justify-between
+                        gap-3
+                      ">
 
-                  </div>
+                        <p className="text-sm text-[#665875]">
+                          Rs.{" "}
+                          {price.toLocaleString()}
+                        </p>
 
-                  {/* ADD TO BAG */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(
+                              `/product/${productId}`
+                            )
+                          }
+                          className="
+                            flex
+                            items-center
+                            gap-2
+                            text-[9px]
+                            uppercase
+                            tracking-[2px]
+                            text-[#9B72D0]
+                            hover:text-[#514064]
+                            transition
+                          "
+                        >
+                          View
+                          <ArrowRight size={13} />
+                        </button>
 
-                  <button
-                    onClick={() => navigate("/shop")}
-                    className="
-                      mt-5
-                      w-full
-                      h-12
-                      border
-                      border-[#DCCFE8]
-                      flex
-                      items-center
-                      justify-center
-                      gap-3
-                      text-[#665875]
-                      uppercase
-                      tracking-[2px]
-                      text-[9px]
-                      hover:bg-[#5E4B7A]
-                      hover:text-white
-                      hover:border-[#5E4B7A]
-                      transition
-                    "
-                  >
-                    <ShoppingBag size={14} />
-                    View Piece
-                  </button>
+                      </div>
 
-                </div>
-              </motion.article>
-            ))}
+                      {/* ADD TO BAG */}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleAddToCart(item)
+                        }
+                        disabled={
+                          addingId === productId
+                        }
+                        className="
+                          mt-5
+                          w-full
+                          h-12
+                          border
+                          border-[#DCCFE8]
+                          flex
+                          items-center
+                          justify-center
+                          gap-3
+                          text-[#665875]
+                          uppercase
+                          tracking-[2px]
+                          text-[9px]
+                          hover:bg-[#5E4B7A]
+                          hover:text-white
+                          hover:border-[#5E4B7A]
+                          transition
+                          disabled:opacity-60
+                          disabled:cursor-not-allowed
+                        "
+                      >
+                        {addingId === productId ? (
+                          <>
+                            <Loader2
+                              size={14}
+                              className="animate-spin"
+                            />
+
+                            Adding...
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingBag size={14} />
+
+                            Add to Bag
+                          </>
+                        )}
+                      </button>
+
+                    </div>
+
+                  </motion.article>
+                );
+              })}
+            </AnimatePresence>
 
           </div>
         )}
 
       </section>
 
-      {/* BOTTOM BRAND STRIP */}
+      {/* =====================================================
+          BOTTOM BRAND STRIP
+      ===================================================== */}
 
       <section className="border-y border-[#E7DFF0] bg-white">
 
@@ -483,4 +812,3 @@ export default function Wishlist() {
     </main>
   );
 }
-
