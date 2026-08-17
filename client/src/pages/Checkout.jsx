@@ -10,13 +10,19 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { useCart } from "../context/CartContext";
+import { createOrder } from "../config/apis/orderApi";
 
 export default function Checkout() {
   const navigate = useNavigate();
 
-  const { cart, cartTotal } = useCart();
+  const {
+    cart,
+    cartTotal,
+    clearCart,
+  } = useCart();
 
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -43,6 +49,7 @@ export default function Checkout() {
 
   const grandTotal = cartTotal + delivery;
 
+  // HANDLE INPUT CHANGE
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -57,6 +64,7 @@ export default function Checkout() {
     }));
   };
 
+  // FORM VALIDATION
   const validateForm = () => {
     const newErrors = {};
 
@@ -70,7 +78,9 @@ export default function Checkout() {
 
     if (!form.email.trim()) {
       newErrors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
+    ) {
       newErrors.email = "Enter a valid email.";
     }
 
@@ -95,43 +105,111 @@ export default function Checkout() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePlaceOrder = (e) => {
+  // PLACE ORDER
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
+
+    if (loading) {
+      return;
+    }
 
     if (!validateForm()) {
       return;
     }
 
-    /*
-      BACKEND ORDER API YAHAN CONNECT HOGI.
+    try {
+      setLoading(true);
 
-      Example later:
+      // Get logged-in user's JWT token
+      const token = localStorage.getItem("token");
 
-      await createOrder({
-        customer: form,
-        items: cart,
+      if (!token) {
+        alert("Please login before placing your order.");
+        navigate("/auth");
+        return;
+      }
+
+      // Prepare order data according to backend Order model
+      const orderData = {
+        customer: {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+        },
+
+        shippingAddress: {
+          address: form.address,
+          city: form.city,
+          postalCode: form.postalCode,
+        },
+
+        items: cart.map((item) => ({
+          product: item._id,
+          productName: item.productName,
+          price: Number(item.price),
+          quantity: Number(item.quantity),
+          image: item.images?.[0] || "",
+        })),
+
         subtotal: cartTotal,
-        delivery,
-        total: grandTotal,
-      });
-    */
 
-    setOrderPlaced(true);
+        delivery,
+
+        total: grandTotal,
+
+        paymentMethod: "Cash on Delivery",
+      };
+
+      // Send order to backend
+      const response = await createOrder(
+        orderData,
+        token
+      );
+
+      console.log("Order Created Successfully:", response);
+
+      // Clear cart after successful order
+      clearCart();
+
+      // Show success screen
+      setOrderPlaced(true);
+    } catch (error) {
+      console.error("Place Order Error:", error);
+
+      // Token expired / invalid
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        alert(
+          "Your session has expired. Please login again."
+        );
+
+        navigate("/auth");
+
+        return;
+      }
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to place order. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  /* EMPTY CART */
-
+  // EMPTY CART
   if (cart.length === 0 && !orderPlaced) {
     return (
       <main className="min-h-screen bg-[#FCFAFF]">
-
         <section className="relative overflow-hidden bg-[#F3ECFA]">
           <div className="absolute -top-32 -right-24 w-80 h-80 rounded-full bg-[#DCC9F4]/40 blur-3xl" />
 
           <div className="absolute -bottom-40 -left-20 w-96 h-96 rounded-full bg-[#E7D9F5]/50 blur-3xl" />
 
           <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-32">
-
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -158,12 +236,10 @@ export default function Checkout() {
                 Your bag is waiting for a beautiful piece.
               </p>
             </motion.div>
-
           </div>
         </section>
 
         <section className="max-w-4xl mx-auto px-6 py-28 text-center">
-
           <ShoppingBag
             size={38}
             strokeWidth={1}
@@ -207,26 +283,21 @@ export default function Checkout() {
           >
             Explore Collection
           </button>
-
         </section>
-
       </main>
     );
   }
 
-  /* SUCCESS */
-
+  // SUCCESS
   if (orderPlaced) {
     return (
       <main className="min-h-screen bg-[#FCFAFF] flex items-center justify-center px-6">
-
         <motion.section
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7 }}
           className="max-w-xl text-center"
         >
-
           <div
             className="
               mx-auto
@@ -287,32 +358,26 @@ export default function Checkout() {
             Continue Shopping
             <ArrowLeft size={14} />
           </button>
-
         </motion.section>
-
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-[#FCFAFF]">
-
       {/* HERO */}
 
       <section className="relative overflow-hidden bg-[#F3ECFA]">
-
         <div className="absolute -top-32 -right-24 w-80 h-80 rounded-full bg-[#DCC9F4]/40 blur-3xl" />
 
         <div className="absolute -bottom-40 -left-20 w-96 h-96 rounded-full bg-[#E7D9F5]/50 blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-6 py-20 md:py-24">
-
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-
             <button
               type="button"
               onClick={() => navigate("/cart")}
@@ -357,19 +422,14 @@ export default function Checkout() {
             <p className="mt-6 text-sm text-[#81768D]">
               Complete your details and make your Roselle selection yours.
             </p>
-
           </motion.div>
-
         </div>
-
       </section>
 
       {/* CONTENT */}
 
       <section className="max-w-7xl mx-auto px-6 py-16 md:py-20">
-
         <div className="grid lg:grid-cols-[1fr_390px] gap-14 lg:gap-20">
-
           {/* FORM */}
 
           <motion.form
@@ -378,13 +438,10 @@ export default function Checkout() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-
             {/* CONTACT */}
 
             <div>
-
               <div className="flex items-end justify-between border-b border-[#E5DCEA] pb-4">
-
                 <div>
                   <p className="uppercase tracking-[4px] text-[10px] text-[#9B72D0]">
                     01
@@ -407,11 +464,9 @@ export default function Checkout() {
                   size={15}
                   className="text-[#9B72D0]"
                 />
-
               </div>
 
               <div className="grid md:grid-cols-2 gap-5 mt-7">
-
                 <InputField
                   label="First name"
                   name="firstName"
@@ -444,17 +499,13 @@ export default function Checkout() {
                   onChange={handleChange}
                   error={errors.phone}
                 />
-
               </div>
-
             </div>
 
             {/* DELIVERY */}
 
             <div className="mt-14">
-
               <div className="border-b border-[#E5DCEA] pb-4">
-
                 <p className="uppercase tracking-[4px] text-[10px] text-[#9B72D0]">
                   02
                 </p>
@@ -470,11 +521,9 @@ export default function Checkout() {
                 >
                   Delivery details
                 </h2>
-
               </div>
 
               <div className="mt-7 space-y-5">
-
                 <InputField
                   label="Delivery address"
                   name="address"
@@ -484,7 +533,6 @@ export default function Checkout() {
                 />
 
                 <div className="grid md:grid-cols-2 gap-5">
-
                   <InputField
                     label="City"
                     name="city"
@@ -500,19 +548,14 @@ export default function Checkout() {
                     onChange={handleChange}
                     error={errors.postalCode}
                   />
-
                 </div>
-
               </div>
-
             </div>
 
             {/* PAYMENT */}
 
             <div className="mt-14">
-
               <div className="border-b border-[#E5DCEA] pb-4">
-
                 <p className="uppercase tracking-[4px] text-[10px] text-[#9B72D0]">
                   03
                 </p>
@@ -528,7 +571,6 @@ export default function Checkout() {
                 >
                   Payment
                 </h2>
-
               </div>
 
               <div
@@ -544,9 +586,7 @@ export default function Checkout() {
                   gap-5
                 "
               >
-
                 <div className="flex items-center gap-4">
-
                   <div
                     className="
                       w-10
@@ -572,7 +612,6 @@ export default function Checkout() {
                       Pay when your order arrives.
                     </p>
                   </div>
-
                 </div>
 
                 <span
@@ -584,13 +623,14 @@ export default function Checkout() {
                     border-[#9B72D0]
                   "
                 />
-
               </div>
-
             </div>
+
+            {/* PLACE ORDER */}
 
             <button
               type="submit"
+              disabled={loading}
               className="
                 mt-10
                 w-full
@@ -606,17 +646,19 @@ export default function Checkout() {
                 items-center
                 justify-center
                 gap-3
+                disabled:opacity-60
+                disabled:cursor-not-allowed
               "
             >
               <Lock size={14} />
-              Place Order
+
+              {loading ? "Placing Order..." : "Place Order"}
             </button>
 
             <p className="mt-4 text-center text-[10px] leading-5 text-[#9A909F]">
               Your information is handled securely and used only
               to process your Roselle order.
             </p>
-
           </motion.form>
 
           {/* SUMMARY */}
@@ -636,13 +678,11 @@ export default function Checkout() {
               lg:top-28
             "
           >
-
             <p className="uppercase tracking-[4px] text-[10px] text-[#9B72D0]">
               Your selection
             </p>
 
             <div className="mt-3 flex items-end justify-between gap-4">
-
               <h2
                 className="
                   font-['Cormorant_Garamond']
@@ -654,17 +694,15 @@ export default function Checkout() {
               </h2>
 
               <span className="text-[10px] text-[#81768D]">
-                {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+                {itemCount}{" "}
+                {itemCount === 1 ? "piece" : "pieces"}
               </span>
-
             </div>
 
             {/* ITEMS */}
 
             <div className="mt-8 space-y-5">
-
               {cart.map((item) => {
-
                 const image =
                   item.images?.[0] ||
                   "https://placehold.co/500x600/F0E8F7/5E4B7A?text=Roselle";
@@ -674,9 +712,7 @@ export default function Checkout() {
                     key={item._id}
                     className="flex gap-4"
                   >
-
                     <div className="relative w-20 h-24 shrink-0 overflow-hidden bg-[#EDE5F5]">
-
                       <img
                         src={image}
                         alt={item.productName}
@@ -701,11 +737,9 @@ export default function Checkout() {
                       >
                         {item.quantity}
                       </span>
-
                     </div>
 
                     <div className="flex-1 min-w-0">
-
                       <p className="text-[9px] uppercase tracking-[2px] text-[#9B72D0]">
                         {item.category || "Roselle"}
                       </p>
@@ -729,21 +763,18 @@ export default function Checkout() {
                           Number(item.quantity)
                         ).toLocaleString()}
                       </p>
-
                     </div>
-
                   </div>
                 );
               })}
-
             </div>
 
             <div className="my-7 h-px bg-[#E5DCEA]" />
 
             <div className="space-y-4 text-sm">
-
               <div className="flex justify-between text-[#81768D]">
                 <span>Subtotal</span>
+
                 <span>
                   Rs. {cartTotal.toLocaleString()}
                 </span>
@@ -751,17 +782,16 @@ export default function Checkout() {
 
               <div className="flex justify-between text-[#81768D]">
                 <span>Delivery</span>
+
                 <span>
                   Rs. {delivery.toLocaleString()}
                 </span>
               </div>
-
             </div>
 
             <div className="my-7 h-px bg-[#E5DCEA]" />
 
             <div className="flex items-end justify-between">
-
               <span className="uppercase tracking-[2px] text-[10px] text-[#514064]">
                 Total
               </span>
@@ -775,13 +805,10 @@ export default function Checkout() {
               >
                 Rs. {grandTotal.toLocaleString()}
               </span>
-
             </div>
 
             <div className="mt-7 bg-[#F8F4FC] p-5">
-
               <div className="flex gap-3">
-
                 <SparkleIcon />
 
                 <div>
@@ -794,23 +821,17 @@ export default function Checkout() {
                     before making its way to you.
                   </p>
                 </div>
-
               </div>
-
             </div>
-
           </motion.aside>
-
         </div>
-
       </section>
-
     </main>
   );
 }
 
 
-/* INPUT COMPONENT */
+// INPUT COMPONENT
 
 function InputField({
   label,
@@ -822,7 +843,6 @@ function InputField({
 }) {
   return (
     <div>
-
       <label
         htmlFor={name}
         className="
@@ -867,13 +887,12 @@ function InputField({
           {error}
         </p>
       )}
-
     </div>
   );
 }
 
 
-/* SMALL ICON */
+// SMALL ICON
 
 function SparkleIcon() {
   return (
