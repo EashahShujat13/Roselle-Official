@@ -1,7 +1,6 @@
 import axiosInstance from "../axios";
 
-
-// CREATE ORDER
+// Create Order
 export const createOrder = async (orderData, token) => {
   const response = await axiosInstance.post(
     "/orders/add",
@@ -16,8 +15,7 @@ export const createOrder = async (orderData, token) => {
   return response.data;
 };
 
-
-// GET MY ORDERS
+// Get Logged-in User's Orders
 export const getMyOrders = async (token) => {
   const response = await axiosInstance.get(
     "/orders",
@@ -31,11 +29,10 @@ export const getMyOrders = async (token) => {
   return response.data;
 };
 
-
-// GET SINGLE ORDER
-export const getSingleOrder = async (orderId, token) => {
+// Get Single Order
+export const getSingleOrder = async (id, token) => {
   const response = await axiosInstance.get(
-    `/orders/${orderId}`,
+    `/orders/${id}`,
     {
       headers: {
         Authorization: token,

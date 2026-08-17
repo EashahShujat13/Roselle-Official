@@ -8,6 +8,8 @@ import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Profile from "../pages/Profile";
 import Wishlist from "../pages/Wishlist";
+import Orders from "../pages/Orders";
+import OrderDetails from "../pages/OrderDetails";
 import ResetPassword from "../pages/ResetPassword";
 
 export default function AppRoutes() {
@@ -39,21 +41,30 @@ export default function AppRoutes() {
         element={<Cart />}
       />
 
-      <Route 
-       path="/checkout"
-       element={<Checkout />} 
-      />
       <Route
-       path="/profile"
-       element={<Profile />}
+        path="/checkout"
+        element={<Checkout />}
       />
 
-      <Route 
+      <Route
+        path="/profile"
+        element={<Profile />}
+      />
+
+      <Route
+        path="/orders"
+        element={<Orders />}
+      />
+
+      <Route
+        path="/orders/:id"
+        element={<OrderDetails />}
+      />
+
+      <Route
         path="/wishlist"
-         element={<Wishlist />}
+        element={<Wishlist />}
       />
-
-      
 
       <Route
         path="/reset-password/:token"
