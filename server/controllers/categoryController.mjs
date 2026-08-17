@@ -1,5 +1,5 @@
 import Category from "../models/category.mjs";
-import Products from "../models/product.mjs";
+
 
 export const addCategory = async (req, res) => {
 

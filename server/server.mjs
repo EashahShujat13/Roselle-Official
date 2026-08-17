@@ -6,6 +6,8 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.mjs";
 import productRoutes from "./routes/productRoutes.mjs";
 import categoryRoutes from "./routes/categoryRoutes.mjs";
+import orderRoutes from "./routes/orderRoutes.mjs";
+
 
 const app = express();
 
@@ -22,6 +24,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/category", categoryRoutes);
+app.use("/api/orders", orderRoutes);
 
 // Local development
 // if (process.env.NODE_ENV !== "production") {
