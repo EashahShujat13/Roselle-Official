@@ -8,7 +8,7 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import bgImage from "../assets/images/banners/ringImg.jpg";
@@ -22,7 +22,6 @@ import { useCart } from "../context/CartContext";
 
 export default function Wishlist() {
   const navigate = useNavigate();
-
   const { addToCart } = useCart();
 
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -33,12 +32,13 @@ export default function Wishlist() {
 
   const token = localStorage.getItem("token");
 
-  /*
-   * FETCH WISHLIST
-   */
-  const fetchWishlist = async () => {
+  // =========================================================
+  // FETCH WISHLIST
+  // =========================================================
+
+  const fetchWishlist = useCallback(async () => {
     if (!token) {
-      navigate("/auth");
+      setLoading(false);
       return;
     }
 
@@ -67,22 +67,22 @@ export default function Wishlist() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, navigate]);
 
-  /*
-   * LOAD WISHLIST
-   */
+  // =========================================================
+  // LOAD WISHLIST
+  // =========================================================
+
   useEffect(() => {
     fetchWishlist();
-  }, []);
+  }, [fetchWishlist]);
 
-  /*
-   * REMOVE FROM WISHLIST
-   */
+  // =========================================================
+  // REMOVE FROM WISHLIST
+  // =========================================================
+
   const handleRemove = async (productId) => {
-    if (!token || removingId) {
-      return;
-    }
+    if (!token || removingId) return;
 
     try {
       setRemovingId(productId);
@@ -90,9 +90,9 @@ export default function Wishlist() {
 
       await removeFromWishlist(productId, token);
 
-      setWishlistItems((items) =>
-        items.filter(
-          (item) => item._id !== productId
+      setWishlistItems((currentItems) =>
+        currentItems.filter(
+          (item) => item?._id !== productId
         )
       );
     } catch (error) {
@@ -115,40 +115,37 @@ export default function Wishlist() {
     }
   };
 
-  /*
-   * ADD TO CART
-   */
-  const handleAddToCart = async (product) => {
-    if (!product?._id || addingId) {
-      return;
-    }
+  // =========================================================
+  // ADD TO CART
+  // =========================================================
+
+  const handleAddToCart = (product) => {
+    if (!product?._id || addingId) return;
 
     try {
       setAddingId(product._id);
 
-      /*
-       * Existing CartContext handles cart state.
-       */
       addToCart(product);
-
     } catch (error) {
       console.error("Add To Cart Error:", error);
     } finally {
       setTimeout(() => {
         setAddingId(null);
-      }, 500);
+      }, 700);
     }
   };
 
-  /*
-   * LOGIN PROTECTION
-   */
+  // =========================================================
+  // LOGIN PROTECTION
+  // =========================================================
+
   if (!token) {
     return (
       <main className="min-h-screen bg-[#FAF7FD] flex items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
           className="max-w-md text-center"
         >
           <Heart
@@ -203,9 +200,10 @@ export default function Wishlist() {
     );
   }
 
-  /*
-   * LOADING
-   */
+  // =========================================================
+  // LOADING
+  // =========================================================
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#FAF7FD] flex items-center justify-center">
@@ -248,11 +246,7 @@ export default function Wishlist() {
           backgroundImage: `url('${bgImage}')`,
         }}
       >
-        {/* Overlay */}
-
         <div className="absolute inset-0 bg-[#3F3155]/70" />
-
-        {/* Glow */}
 
         <div
           className="
@@ -349,15 +343,14 @@ export default function Wishlist() {
           <div className="flex items-center gap-4">
             <p className="text-xs text-[#81768D]">
               {wishlistItems.length}{" "}
-              {wishlistItems.length === 1
-                ? "piece"
-                : "pieces"}{" "}
-              saved
+              {wishlistItems.length === 1 ? "piece" : "pieces"} saved
             </p>
 
             <button
               type="button"
               onClick={fetchWishlist}
+              disabled={loading}
+              aria-label="Refresh wishlist"
               className="
                 w-9
                 h-9
@@ -369,8 +362,8 @@ export default function Wishlist() {
                 text-[#806298]
                 hover:bg-[#F1E8FA]
                 transition
+                disabled:opacity-50
               "
-              aria-label="Refresh wishlist"
             >
               <RefreshCw size={13} />
             </button>
@@ -478,7 +471,6 @@ export default function Wishlist() {
             </button>
           </motion.div>
         ) : (
-
           /* =================================================
              PRODUCT GRID
           ================================================= */
@@ -487,16 +479,21 @@ export default function Wishlist() {
 
             <AnimatePresence mode="popLayout">
               {wishlistItems.map((item, index) => {
-
-                const productId = item._id;
+                const productId = item?._id;
 
                 const image =
-                  item.images?.[0] ||
+                  item?.images?.[0] ||
                   "https://placehold.co/600x750/F3ECFA/5E4B7A?text=Roselle";
 
-                const price = Number(
-                  item.price || 0
-                );
+                const price = Number(item?.price || 0);
+
+                const productName =
+                  item?.productName ||
+                  item?.name ||
+                  "Roselle Piece";
+
+                const category =
+                  item?.category || "Roselle";
 
                 return (
                   <motion.article
@@ -530,16 +527,17 @@ export default function Wishlist() {
 
                     {/* IMAGE */}
 
-                    <div className="
-                      relative
-                      aspect-[4/5]
-                      overflow-hidden
-                      bg-[#F3ECFA]
-                    ">
-
+                    <div
+                      className="
+                        relative
+                        aspect-[4/5]
+                        overflow-hidden
+                        bg-[#F3ECFA]
+                      "
+                    >
                       <img
                         src={image}
-                        alt={item.productName || "Roselle jewellery"}
+                        alt={productName}
                         className="
                           w-full
                           h-full
@@ -553,8 +551,6 @@ export default function Wishlist() {
                             "https://placehold.co/600x750/F3ECFA/5E4B7A?text=Roselle";
                         }}
                       />
-
-                      {/* IMAGE OVERLAY */}
 
                       <div
                         className="
@@ -574,12 +570,8 @@ export default function Wishlist() {
                         onClick={() =>
                           handleRemove(productId)
                         }
-                        disabled={
-                          removingId === productId
-                        }
-                        aria-label={`Remove ${
-                          item.productName || "product"
-                        } from wishlist`}
+                        disabled={removingId === productId}
+                        aria-label={`Remove ${productName} from wishlist`}
                         className="
                           absolute
                           top-4
@@ -628,22 +620,22 @@ export default function Wishlist() {
                         "
                       >
                         <div className="flex items-center gap-2">
-
                           <Heart
                             size={11}
                             fill="currentColor"
                             className="text-[#9B72D0]"
                           />
 
-                          <span className="
-                            text-[8px]
-                            uppercase
-                            tracking-[2px]
-                            text-[#665875]
-                          ">
+                          <span
+                            className="
+                              text-[8px]
+                              uppercase
+                              tracking-[2px]
+                              text-[#665875]
+                            "
+                          >
                             Saved
                           </span>
-
                         </div>
                       </div>
                     </div>
@@ -652,13 +644,15 @@ export default function Wishlist() {
 
                     <div className="p-5">
 
-                      <p className="
-                        text-[8px]
-                        uppercase
-                        tracking-[3px]
-                        text-[#9B72D0]
-                      ">
-                        {item.category || "Roselle"}
+                      <p
+                        className="
+                          text-[8px]
+                          uppercase
+                          tracking-[3px]
+                          text-[#9B72D0]
+                        "
+                      >
+                        {category}
                       </p>
 
                       <h3
@@ -670,28 +664,26 @@ export default function Wishlist() {
                           line-clamp-1
                         "
                       >
-                        {item.productName || "Roselle Piece"}
+                        {productName}
                       </h3>
 
-                      <div className="
-                        mt-4
-                        flex
-                        items-center
-                        justify-between
-                        gap-3
-                      ">
-
+                      <div
+                        className="
+                          mt-4
+                          flex
+                          items-center
+                          justify-between
+                          gap-3
+                        "
+                      >
                         <p className="text-sm text-[#665875]">
-                          Rs.{" "}
-                          {price.toLocaleString()}
+                          Rs. {price.toLocaleString()}
                         </p>
 
                         <button
                           type="button"
                           onClick={() =>
-                            navigate(
-                              `/product/${productId}`
-                            )
+                            navigate(`/product/${productId}`)
                           }
                           className="
                             flex
@@ -708,7 +700,6 @@ export default function Wishlist() {
                           View
                           <ArrowRight size={13} />
                         </button>
-
                       </div>
 
                       {/* ADD TO BAG */}
@@ -718,9 +709,7 @@ export default function Wishlist() {
                         onClick={() =>
                           handleAddToCart(item)
                         }
-                        disabled={
-                          addingId === productId
-                        }
+                        disabled={addingId === productId}
                         className="
                           mt-5
                           w-full
@@ -749,20 +738,16 @@ export default function Wishlist() {
                               size={14}
                               className="animate-spin"
                             />
-
                             Adding...
                           </>
                         ) : (
                           <>
                             <ShoppingBag size={14} />
-
                             Add to Bag
                           </>
                         )}
                       </button>
-
                     </div>
-
                   </motion.article>
                 );
               })}
@@ -770,7 +755,6 @@ export default function Wishlist() {
 
           </div>
         )}
-
       </section>
 
       {/* =====================================================
@@ -778,7 +762,6 @@ export default function Wishlist() {
       ===================================================== */}
 
       <section className="border-y border-[#E7DFF0] bg-white">
-
         <div className="max-w-7xl mx-auto px-6 py-14 text-center">
 
           <div className="flex justify-center">
@@ -806,7 +789,6 @@ export default function Wishlist() {
           </p>
 
         </div>
-
       </section>
 
     </main>
