@@ -14,7 +14,7 @@ import {
   getMyWishlist,
   addToWishlist,
   removeFromWishlist,
-} from "../config/apis/wishlistApi";
+} from "../../config/apis/wishlistApi";
 
 export default function ProductCard({
   product,
