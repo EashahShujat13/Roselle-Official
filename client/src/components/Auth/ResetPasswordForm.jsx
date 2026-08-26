@@ -11,30 +11,26 @@ import {
   useParams,
 } from "react-router-dom";
 
-import {
-  resetPassword,
-} from "../../config/apis/authApi";
+import { resetPassword } from "../../config/apis/authApi";
+import { useToast } from "../../context/ToastContext";
 
 export default function ResetPasswordForm() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [showPassword, setShowPassword] =
     useState(false);
 
-  const [
-    showConfirmPassword,
-    setShowConfirmPassword,
-  ] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
 
-  const [formData, setFormData] =
-    useState({
-      password: "",
-      confirmPassword: "",
-    });
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: "",
+  });
 
   const handleChange = (e) => {
     setFormData({
@@ -50,29 +46,35 @@ export default function ResetPasswordForm() {
       formData.password !==
       formData.confirmPassword
     ) {
-      alert("Passwords do not match");
+      showToast(
+        "Passwords do not match",
+        "error"
+      );
       return;
     }
 
     try {
       setLoading(true);
 
-      const response =
-        await resetPassword(
-          token,
-          {
-            password:
-              formData.password,
-          }
-        );
+      const response = await resetPassword(
+        token,
+        {
+          password: formData.password,
+        }
+      );
 
-      alert(response.message);
+      showToast(
+        response.message ||
+          "Password reset successfully.",
+        "success"
+      );
 
       navigate("/auth");
     } catch (error) {
-      alert(
+      showToast(
         error.response?.data?.message ||
-          "Reset Failed"
+          "Reset Failed",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -104,22 +106,22 @@ export default function ResetPasswordForm() {
       onSubmit={handleSubmit}
       className="space-y-5"
     >
-
       {/* Password */}
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           New Password
         </label>
 
         <div className="relative">
-
           <FiLock
             size={17}
             className="
@@ -148,9 +150,7 @@ export default function ResetPasswordForm() {
           <button
             type="button"
             onClick={() =>
-              setShowPassword(
-                !showPassword
-              )
+              setShowPassword(!showPassword)
             }
             className="
               absolute
@@ -167,25 +167,25 @@ export default function ResetPasswordForm() {
               <Eye size={17} />
             )}
           </button>
-
         </div>
       </div>
 
       {/* Confirm */}
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           Confirm Password
         </label>
 
         <div className="relative">
-
           <FiLock
             size={17}
             className="
@@ -235,7 +235,6 @@ export default function ResetPasswordForm() {
               <Eye size={17} />
             )}
           </button>
-
         </div>
       </div>
 
@@ -261,6 +260,7 @@ export default function ResetPasswordForm() {
           transition-all
           hover:bg-[#806298]
           disabled:opacity-60
+          disabled:cursor-not-allowed
         "
       >
         {loading
@@ -277,7 +277,6 @@ export default function ResetPasswordForm() {
           />
         )}
       </motion.button>
-
     </form>
   );
 }

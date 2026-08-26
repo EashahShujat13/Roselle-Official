@@ -4,15 +4,13 @@ import { FiMail } from "react-icons/fi";
 import { useState } from "react";
 
 import { forgotPassword } from "../../config/apis/authApi";
+import { useToast } from "../../context/ToastContext";
 
-export default function ForgotPasswordForm({
-  goBack,
-}) {
-  const [loading, setLoading] =
-    useState(false);
+export default function ForgotPasswordForm({ goBack }) {
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
 
-  const [email, setEmail] =
-    useState("");
+  const { showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,16 +18,19 @@ export default function ForgotPasswordForm({
     try {
       setLoading(true);
 
-      const response =
-        await forgotPassword({ email });
+      const response = await forgotPassword({ email });
 
-      alert(response.message);
+      showToast(
+        response.message || "Password reset link sent successfully.",
+        "success"
+      );
 
       setEmail("");
     } catch (error) {
-      alert(
+      showToast(
         error.response?.data?.message ||
-          "Something went wrong"
+          "Something went wrong. Please try again.",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -37,11 +38,7 @@ export default function ForgotPasswordForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6"
-    >
-
+    <form onSubmit={handleSubmit} className="space-y-6">
       <button
         type="button"
         onClick={goBack}
@@ -70,19 +67,20 @@ export default function ForgotPasswordForm({
       </button>
 
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           Email Address
         </label>
 
         <div className="relative">
-
           <FiMail
             size={17}
             className="
@@ -98,9 +96,7 @@ export default function ForgotPasswordForm({
             type="email"
             placeholder="Your email address"
             value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
+            onChange={(e) => setEmail(e.target.value)}
             className="
               w-full
               rounded-xl
@@ -122,7 +118,6 @@ export default function ForgotPasswordForm({
             "
             required
           />
-
         </div>
       </div>
 
@@ -148,11 +143,10 @@ export default function ForgotPasswordForm({
           transition-all
           hover:bg-[#806298]
           disabled:opacity-60
+          disabled:cursor-not-allowed
         "
       >
-        {loading
-          ? "Sending Link..."
-          : "Send Reset Link"}
+        {loading ? "Sending Link..." : "Send Reset Link"}
 
         {!loading && (
           <ArrowRight
@@ -165,16 +159,16 @@ export default function ForgotPasswordForm({
         )}
       </motion.button>
 
-      <p className="
-        text-center
-        text-[10px]
-        leading-5
-        text-[#9A909F]
-      ">
-        We'll send a secure password reset
-        link to your registered email.
+      <p
+        className="
+          text-center
+          text-[10px]
+          leading-5
+          text-[#9A909F]
+        "
+      >
+        We'll send a secure password reset link to your registered email.
       </p>
-
     </form>
   );
 }

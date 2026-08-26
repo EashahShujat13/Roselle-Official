@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles } from "lucide-react";
+
 import authImage from "../../assets/images/auth/roselleauth.jpg";
+
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
@@ -36,7 +38,6 @@ export default function AuthCard() {
 
   return (
     <main className="min-h-screen bg-[#F8F4FB] px-4 py-6 md:px-8 lg:px-10">
-
       <div
         className="
           mx-auto
@@ -51,7 +52,6 @@ export default function AuthCard() {
           lg:grid-cols-2
         "
       >
-
         {/* =====================================================
             LEFT IMAGE
         ====================================================== */}
@@ -59,7 +59,10 @@ export default function AuthCard() {
         <motion.section
           initial={{ opacity: 0, scale: 1.03 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.1, ease: "easeOut" }}
+          transition={{
+            duration: 1.1,
+            ease: "easeOut",
+          }}
           className="
             relative
             hidden
@@ -68,7 +71,6 @@ export default function AuthCard() {
             lg:block
           "
         >
-
           {/* Background Image */}
 
           <img
@@ -98,12 +100,17 @@ export default function AuthCard() {
 
           {/* =================================================
               ROSELLE BRAND
-              MOVED TO RIGHT SIDE
           ================================================= */}
 
           <motion.div
-            initial={{ opacity: 0, x: 25 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{
+              opacity: 0,
+              x: 25,
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+            }}
             transition={{
               duration: 0.9,
               delay: 0.25,
@@ -116,7 +123,6 @@ export default function AuthCard() {
               text-right
             "
           >
-
             <p
               className="
                 font-['Cormorant_Garamond']
@@ -138,7 +144,6 @@ export default function AuthCard() {
                 bg-[#D7B7FF]
               "
             />
-
           </motion.div>
 
           {/* Small decorative icon */}
@@ -162,7 +167,10 @@ export default function AuthCard() {
               backdrop-blur-md
             "
           >
-            <Sparkles size={17} strokeWidth={1.3} />
+            <Sparkles
+              size={17}
+              strokeWidth={1.3}
+            />
           </div>
 
           {/* =================================================
@@ -170,8 +178,14 @@ export default function AuthCard() {
           ================================================= */}
 
           <motion.div
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{
+              opacity: 0,
+              y: 25,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
             transition={{
               duration: 0.9,
               delay: 0.45,
@@ -184,7 +198,6 @@ export default function AuthCard() {
               z-10
             "
           >
-
             <p
               className="
                 uppercase
@@ -219,11 +232,8 @@ export default function AuthCard() {
                 part of your story.
               </span>
             </h2>
-
           </motion.div>
-
         </motion.section>
-
 
         {/* =====================================================
             RIGHT AUTH PANEL
@@ -246,7 +256,6 @@ export default function AuthCard() {
             xl:px-24
           "
         >
-
           {/* Soft decorative glow */}
 
           <div
@@ -277,13 +286,18 @@ export default function AuthCard() {
             "
           />
 
-
-          <div className="relative z-10 mx-auto w-full max-w-[560px]">
-
+          <div
+            className="
+              relative
+              z-10
+              mx-auto
+              w-full
+              max-w-[560px]
+            "
+          >
             {/* Mobile Brand */}
 
             <div className="mb-12 lg:hidden">
-
               <p
                 className="
                   font-['Cormorant_Garamond']
@@ -295,17 +309,21 @@ export default function AuthCard() {
                 ROSELLE
               </p>
 
-              <div className="mt-2 h-px w-10 bg-[#B48CF0]" />
-
+              <div
+                className="
+                  mt-2
+                  h-px
+                  w-10
+                  bg-[#B48CF0]
+                "
+              />
             </div>
-
 
             {/* =================================================
                 HEADER
             ================================================== */}
 
             <AnimatePresence mode="wait">
-
               <motion.div
                 key={authScreen}
                 initial={{
@@ -324,7 +342,6 @@ export default function AuthCard() {
                   duration: 0.35,
                 }}
               >
-
                 <p
                   className="
                     uppercase
@@ -360,18 +377,14 @@ export default function AuthCard() {
                 >
                   {current.description}
                 </p>
-
               </motion.div>
-
             </AnimatePresence>
-
 
             {/* =================================================
                 AUTH TABS
             ================================================== */}
 
             {authScreen !== "forgot" && (
-
               <div
                 className="
                   mt-10
@@ -380,10 +393,13 @@ export default function AuthCard() {
                   border-[#E5DCEA]
                 "
               >
+                {/* Sign In */}
 
                 <button
                   type="button"
-                  onClick={() => setAuthScreen("login")}
+                  onClick={() =>
+                    setAuthScreen("login")
+                  }
                   className={`
                     relative
                     flex-1
@@ -414,13 +430,15 @@ export default function AuthCard() {
                       "
                     />
                   )}
-
                 </button>
 
+                {/* Create Account */}
 
                 <button
                   type="button"
-                  onClick={() => setAuthScreen("signup")}
+                  onClick={() =>
+                    setAuthScreen("signup")
+                  }
                   className={`
                     relative
                     flex-1
@@ -451,22 +469,16 @@ export default function AuthCard() {
                       "
                     />
                   )}
-
                 </button>
-
               </div>
-
             )}
-
 
             {/* =================================================
                 FORM
             ================================================== */}
 
             <div className="mt-9">
-
               <AnimatePresence mode="wait">
-
                 <motion.div
                   key={authScreen}
                   initial={{
@@ -485,6 +497,7 @@ export default function AuthCard() {
                     duration: 0.35,
                   }}
                 >
+                  {/* Login */}
 
                   {authScreen === "login" && (
                     <LoginForm
@@ -494,62 +507,27 @@ export default function AuthCard() {
                     />
                   )}
 
+                  {/* Signup */}
+
                   {authScreen === "signup" && (
                     <SignupForm />
                   )}
 
+                  {/* Forgot Password */}
+
                   {authScreen === "forgot" && (
-                    <ForgotPasswordForm />
+                    <ForgotPasswordForm
+                      goBack={() =>
+                        setAuthScreen("login")
+                      }
+                    />
                   )}
-
                 </motion.div>
-
               </AnimatePresence>
-
             </div>
-
-
-            {/* =================================================
-                FORGOT PASSWORD BACK
-            ================================================== */}
-
-            {authScreen === "forgot" && (
-
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                type="button"
-                onClick={() => setAuthScreen("login")}
-                className="
-                  mt-7
-                  flex
-                  items-center
-                  gap-2
-                  text-[9px]
-                  uppercase
-                  tracking-[0.3em]
-                  text-[#806298]
-                  transition
-                  hover:text-[#B48CF0]
-                "
-              >
-                <ArrowRight
-                  size={13}
-                  className="rotate-180"
-                />
-
-                Back to sign in
-
-              </motion.button>
-
-            )}
-
           </div>
-
         </section>
-
       </div>
-
     </main>
   );
 }

@@ -1,29 +1,43 @@
 import { Routes, Route } from "react-router-dom";
 
+// Main Pages
 import Home from "../pages/Home";
-import Auth from "../pages/Auth";
 import Shop from "../pages/Shop";
 import SingleProduct from "../pages/SingleProduct";
+
+// Authentication
+import Auth from "../pages/Auth";
+import ResetPassword from "../pages/ResetPassword";
+
+// Shopping
 import Cart from "../pages/Cart";
-import Checkout from "../pages/Checkout";
-import Profile from "../pages/Profile";
 import Wishlist from "../pages/Wishlist";
+import Checkout from "../pages/Checkout";
+
+// Account & Orders
+import Profile from "../pages/Profile";
 import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
-import ResetPassword from "../pages/ResetPassword";
+
+// Information Pages
+import Contact from "../pages/Contact";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
+import Terms from "../pages/Terms";
+import ShippingReturns from "../pages/ShippingReturns";
+
+// Fallback
+import NotFound from "../pages/NotFound";
 
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* =========================
+          MAIN
+      ========================= */}
 
       <Route
         path="/"
         element={<Home />}
-      />
-
-      <Route
-        path="/auth"
-        element={<Auth />}
       />
 
       <Route
@@ -36,15 +50,42 @@ export default function AppRoutes() {
         element={<SingleProduct />}
       />
 
+      {/* =========================
+          AUTHENTICATION
+      ========================= */}
+
+      <Route
+        path="/auth"
+        element={<Auth />}
+      />
+
+      <Route
+        path="/reset-password/:token"
+        element={<ResetPassword />}
+      />
+
+      {/* =========================
+          SHOPPING
+      ========================= */}
+
       <Route
         path="/cart"
         element={<Cart />}
       />
 
       <Route
+        path="/wishlist"
+        element={<Wishlist />}
+      />
+
+      <Route
         path="/checkout"
         element={<Checkout />}
       />
+
+      {/* =========================
+          ACCOUNT & ORDERS
+      ========================= */}
 
       <Route
         path="/profile"
@@ -61,16 +102,38 @@ export default function AppRoutes() {
         element={<OrderDetails />}
       />
 
+      {/* =========================
+          INFORMATION
+      ========================= */}
+
       <Route
-        path="/wishlist"
-        element={<Wishlist />}
+        path="/contact"
+        element={<Contact />}
       />
 
       <Route
-        path="/reset-password/:token"
-        element={<ResetPassword />}
+        path="/privacy-policy"
+        element={<PrivacyPolicy />}
       />
 
+      <Route
+        path="/terms"
+        element={<Terms />}
+      />
+
+      <Route
+        path="/shipping-returns"
+        element={<ShippingReturns />}
+      />
+
+      {/* =========================
+          404
+      ========================= */}
+
+      <Route
+        path="*"
+        element={<NotFound />}
+      />
     </Routes>
   );
 }

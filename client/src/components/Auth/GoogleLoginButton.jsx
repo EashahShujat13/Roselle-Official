@@ -3,9 +3,11 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 
 import { googleLoginUser } from "../../config/apis/authApi";
+import { useToast } from "../../context/ToastContext";
 
 export default function GoogleLoginButton() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -19,15 +21,26 @@ export default function GoogleLoginButton() {
 
       localStorage.setItem("token", response.token);
 
-      alert(response.message);
+      if (response.user) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.user)
+        );
+      }
+
+      showToast(
+        response.message || "Google login successful.",
+        "success"
+      );
 
       navigate("/");
     } catch (error) {
       console.error("Google Login Error:", error);
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-          "Google Login Failed"
+          "Google Login Failed",
+        "error"
       );
     }
   };
@@ -54,7 +67,11 @@ export default function GoogleLoginButton() {
         onSuccess={handleGoogleSuccess}
         onError={() => {
           console.error("Google Sign-In failed");
-          alert("Google Login Failed");
+
+          showToast(
+            "Google Login Failed",
+            "error"
+          );
         }}
         theme="outline"
         size="large"

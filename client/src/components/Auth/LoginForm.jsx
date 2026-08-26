@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 
 import { loginUser } from "../../config/apis/authApi";
 import GoogleLoginButton from "./GoogleLoginButton";
+import { useToast } from "../../context/ToastContext";
 
-export default function LoginForm({
-  openForgotPassword,
-}) {
+export default function LoginForm({ openForgotPassword }) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,19 +38,23 @@ export default function LoginForm({
       localStorage.setItem("token", response.token);
 
       if (response.user) {
-       localStorage.setItem(
-         "user",
-        JSON.stringify(response.user)
-       );
-     }
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.user)
+        );
+      }
 
-      alert(response.message);
+      showToast(
+        response.message || "Login successful.",
+        "success"
+      );
 
       navigate("/");
     } catch (error) {
-      alert(
+      showToast(
         error.response?.data?.message ||
-          "Login Failed"
+          "Login Failed",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -78,26 +82,23 @@ export default function LoginForm({
   `;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-5"
-    >
-
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Email */}
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           Email Address
         </label>
 
         <div className="relative">
-
           <FiMail
             className="
               absolute
@@ -118,24 +119,27 @@ export default function LoginForm({
             className={inputClass}
             required
           />
-
         </div>
       </div>
 
       {/* Password */}
       <div>
-        <div className="
-          mb-2
-          flex
-          items-center
-          justify-between
-        ">
-          <label className="
-            text-[9px]
-            uppercase
-            tracking-[2px]
-            text-[#756982]
-          ">
+        <div
+          className="
+            mb-2
+            flex
+            items-center
+            justify-between
+          "
+        >
+          <label
+            className="
+              text-[9px]
+              uppercase
+              tracking-[2px]
+              text-[#756982]
+            "
+          >
             Password
           </label>
 
@@ -155,7 +159,6 @@ export default function LoginForm({
         </div>
 
         <div className="relative">
-
           <FiLock
             className="
               absolute
@@ -168,11 +171,7 @@ export default function LoginForm({
           />
 
           <input
-            type={
-              showPassword
-                ? "text"
-                : "password"
-            }
+            type={showPassword ? "text" : "password"}
             name="password"
             value={loginData.password}
             onChange={handleChange}
@@ -183,11 +182,7 @@ export default function LoginForm({
 
           <button
             type="button"
-            onClick={() =>
-              setShowPassword(
-                !showPassword
-              )
-            }
+            onClick={() => setShowPassword(!showPassword)}
             className="
               absolute
               right-4
@@ -204,18 +199,19 @@ export default function LoginForm({
               <Eye size={17} />
             )}
           </button>
-
         </div>
       </div>
 
       {/* Remember */}
-      <label className="
-        flex
-        items-center
-        gap-2
-        text-[10px]
-        text-[#81768D]
-      ">
+      <label
+        className="
+          flex
+          items-center
+          gap-2
+          text-[10px]
+          text-[#81768D]
+        "
+      >
         <input
           type="checkbox"
           className="accent-[#B48CF0]"
@@ -225,12 +221,8 @@ export default function LoginForm({
 
       {/* Login button */}
       <motion.button
-        whileHover={{
-          y: -2,
-        }}
-        whileTap={{
-          scale: 0.98,
-        }}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.98 }}
         type="submit"
         disabled={loading}
         className="
@@ -255,9 +247,7 @@ export default function LoginForm({
           disabled:cursor-not-allowed
         "
       >
-        {loading
-          ? "Signing In..."
-          : "Enter Roselle"}
+        {loading ? "Signing In..." : "Enter Roselle"}
 
         {!loading && (
           <ArrowRight
@@ -272,20 +262,24 @@ export default function LoginForm({
       </motion.button>
 
       {/* Divider */}
-      <div className="
-        flex
-        items-center
-        gap-4
-        py-1
-      ">
+      <div
+        className="
+          flex
+          items-center
+          gap-4
+          py-1
+        "
+      >
         <span className="h-px flex-1 bg-[#E7DCEF]" />
 
-        <span className="
-          text-[8px]
-          uppercase
-          tracking-[3px]
-          text-[#A79AAE]
-        ">
+        <span
+          className="
+            text-[8px]
+            uppercase
+            tracking-[3px]
+            text-[#A79AAE]
+          "
+        >
           Or continue with
         </span>
 
@@ -293,7 +287,6 @@ export default function LoginForm({
       </div>
 
       <GoogleLoginButton />
-
     </form>
   );
 }

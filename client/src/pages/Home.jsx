@@ -4,7 +4,7 @@ import RoselleStory from "../components/RoselleStory/RoselleStory";
 import FeaturedProducts from "../components/Products/FeaturedProducts";
 import BeadsEditorial from "../components/BeadsEditorial/BeadsEditorial";
 import Newsletter from "../components/Newsletter/Newsletter";
-import Footer from "../components/Footer";
+
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
       <FeaturedProducts />
       <BeadsEditorial />
       <Newsletter />
-      <Footer />
+      
     </>
   );
 }

@@ -1,13 +1,6 @@
-import {
-  ArrowUpRight,
-  Heart,
-  Loader2,
-} from "lucide-react";
-
-import { motion, AnimatePresence } from "framer-motion";
-
+import { ArrowUpRight, Heart, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
 import { useEffect, useState } from "react";
 
 import {
@@ -16,17 +9,14 @@ import {
   removeFromWishlist,
 } from "../../config/apis/wishlistApi";
 
-export default function ProductCard({
-  product,
-  index = 0,
-}) {
+import { useToast } from "../../context/ToastContext";
+
+export default function ProductCard({ product, index = 0 }) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [liked, setLiked] = useState(false);
-  const [wishlistLoading, setWishlistLoading] =
-    useState(false);
-  const [wishlistMessage, setWishlistMessage] =
-    useState("");
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const image =
     product.images?.[0] ||
@@ -46,24 +36,18 @@ export default function ProductCard({
       }
 
       try {
-        const response =
-          await getMyWishlist(token);
+        const response = await getMyWishlist(token);
 
         const wishlistProducts =
           response?.wishlist?.products || [];
 
-        const isSaved =
-          wishlistProducts.some(
-            (item) =>
-              item?._id === product._id
-          );
+        const isSaved = wishlistProducts.some(
+          (item) => item?._id === product._id
+        );
 
         setLiked(isSaved);
       } catch (error) {
-        console.log(
-          "Product Card Wishlist Status Error:",
-          error
-        );
+        console.log("Product Card Wishlist Status Error:", error);
 
         if (error.response?.status === 401) {
           localStorage.removeItem("token");
@@ -90,47 +74,26 @@ export default function ProductCard({
       return;
     }
 
-    if (
-      !product?._id ||
-      wishlistLoading
-    ) {
+    if (!product?._id || wishlistLoading) {
       return;
     }
 
     try {
       setWishlistLoading(true);
-      setWishlistMessage("");
 
       if (liked) {
-        await removeFromWishlist(
-          product._id,
-          token
-        );
+        await removeFromWishlist(product._id, token);
 
         setLiked(false);
-        setWishlistMessage(
-          "Removed from wishlist"
-        );
+        showToast("Removed from wishlist");
       } else {
-        await addToWishlist(
-          product._id,
-          token
-        );
+        await addToWishlist(product._id, token);
 
         setLiked(true);
-        setWishlistMessage(
-          "Added to wishlist"
-        );
+        showToast("Added to wishlist");
       }
-
-      setTimeout(() => {
-        setWishlistMessage("");
-      }, 2500);
     } catch (error) {
-      console.log(
-        "Product Card Wishlist Error:",
-        error
-      );
+      console.log("Product Card Wishlist Error:", error);
 
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
@@ -140,324 +103,210 @@ export default function ProductCard({
         return;
       }
 
-      setWishlistMessage(
+      showToast(
         error.response?.data?.message ||
-          "Unable to update wishlist"
+          "Unable to update wishlist",
+        "error"
       );
-
-      setTimeout(() => {
-        setWishlistMessage("");
-      }, 2500);
     } finally {
       setWishlistLoading(false);
     }
   };
 
   return (
-    <>
-      {/* =========================
-          WISHLIST TOAST
-      ========================= */}
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{
+        duration: 0.65,
+        delay: Math.min(index * 0.05, 0.25),
+      }}
+      className="group"
+    >
+      {/* IMAGE */}
 
-      <AnimatePresence>
-        {wishlistMessage && (
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: -15,
-              scale: 0.96,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-            }}
-            exit={{
-              opacity: 0,
-              y: -15,
-              scale: 0.96,
-            }}
-            transition={{
-              duration: 0.25,
-            }}
-            className="
-              fixed
-              top-24
-              right-6
-              z-[100]
-              flex
-              items-center
-              gap-3
-              bg-[#5E4B7A]
-              text-white
-              px-5
-              py-3
-              shadow-lg
-              text-[10px]
-              uppercase
-              tracking-[2px]
-            "
-          >
-            <Heart
-              size={14}
-              fill="currentColor"
-              className="text-[#D7B7FF]"
-            />
-
-            {wishlistMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <motion.article
-        layout
-        initial={{
-          opacity: 0,
-          y: 40,
-        }}
-        whileInView={{
-          opacity: 1,
-          y: 0,
-        }}
-        viewport={{
-          once: true,
-          amount: 0.1,
-        }}
-        transition={{
-          duration: 0.65,
-          delay: Math.min(
-            index * 0.05,
-            0.25
-          ),
-        }}
-        className="group"
+      <div
+        onClick={() => navigate(`/product/${product._id}`)}
+        className="
+          relative
+          overflow-hidden
+          bg-[#EDE5F5]
+          aspect-[4/5]
+          cursor-pointer
+        "
       >
-        {/* IMAGE */}
+        <motion.img
+          src={image}
+          alt={product.productName || "Roselle jewellery"}
+          whileHover={{ scale: 1.06 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="w-full h-full object-cover"
+        />
+
+        {/* OVERLAY */}
 
         <div
-          onClick={() =>
-            navigate(
-              `/product/${product._id}`
-            )
-          }
           className="
-            relative
-            overflow-hidden
-            bg-[#EDE5F5]
-            aspect-[4/5]
-            cursor-pointer
+            absolute
+            inset-0
+            bg-gradient-to-t
+            from-[#3E3150]/45
+            via-transparent
+            to-transparent
+            opacity-0
+            group-hover:opacity-100
+            transition-opacity
+            duration-500
           "
-        >
-          <motion.img
-            src={image}
-            alt={
-              product.productName ||
-              "Roselle jewellery"
-            }
-            whileHover={{
-              scale: 1.06,
-            }}
-            transition={{
-              duration: 0.7,
-              ease: "easeOut",
-            }}
-            className="
-              w-full
-              h-full
-              object-cover
-            "
-          />
+        />
 
-          {/* OVERLAY */}
+        {/* FEATURED */}
 
-          <div
-            className="
-              absolute
-              inset-0
-              bg-gradient-to-t
-              from-[#3E3150]/45
-              via-transparent
-              to-transparent
-              opacity-0
-              group-hover:opacity-100
-              transition-opacity
-              duration-500
-            "
-          />
-
-          {/* FEATURED */}
-
-          {product.isFeatured && (
-            <span
-              className="
-                absolute
-                top-4
-                left-4
-                bg-white/95
-                px-3
-                py-2
-                text-[8px]
-                uppercase
-                tracking-[2px]
-                text-[#5E4B7A]
-              "
-            >
-              Featured
-            </span>
-          )}
-
-          {/* WISHLIST */}
-
-          <button
-            type="button"
-            onClick={handleWishlist}
-            disabled={wishlistLoading}
-            aria-label={
-              liked
-                ? "Remove from wishlist"
-                : "Add to wishlist"
-            }
+        {product.isFeatured && (
+          <span
             className="
               absolute
               top-4
-              right-4
-              w-10
-              h-10
-              rounded-full
+              left-4
               bg-white/95
-              flex
-              items-center
-              justify-center
-              text-[#5E4B7A]
-              hover:text-[#B48CF0]
-              disabled:opacity-60
-              transition
-            "
-          >
-            {wishlistLoading ? (
-              <Loader2
-                size={16}
-                className="animate-spin"
-              />
-            ) : (
-              <Heart
-                size={17}
-                fill={
-                  liked
-                    ? "currentColor"
-                    : "none"
-                }
-              />
-            )}
-          </button>
-
-          {/* VIEW PIECE */}
-
-          <div
-            className="
-              absolute
-              bottom-5
-              left-1/2
-              -translate-x-1/2
-              translate-y-3
-              opacity-0
-              group-hover:translate-y-0
-              group-hover:opacity-100
-              transition-all
-              duration-500
-              bg-white
-              px-5
-              py-3
-              flex
-              items-center
-              gap-2
-              text-[9px]
+              px-3
+              py-2
+              text-[8px]
               uppercase
               tracking-[2px]
-              text-[#514064]
-              whitespace-nowrap
+              text-[#5E4B7A]
             "
           >
-            View Piece
-            <ArrowUpRight size={13} />
-          </div>
+            Featured
+          </span>
+        )}
+
+        {/* WISHLIST */}
+
+        <button
+          type="button"
+          onClick={handleWishlist}
+          disabled={wishlistLoading}
+          aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
+          className="
+            absolute
+            top-4
+            right-4
+            w-10
+            h-10
+            rounded-full
+            bg-white/95
+            flex
+            items-center
+            justify-center
+            text-[#5E4B7A]
+            hover:text-[#B48CF0]
+            disabled:opacity-60
+            transition
+          "
+        >
+          {wishlistLoading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <Heart size={17} fill={liked ? "currentColor" : "none"} />
+          )}
+        </button>
+
+        {/* VIEW PIECE */}
+
+        <div
+          className="
+            absolute
+            bottom-5
+            left-1/2
+            -translate-x-1/2
+            translate-y-3
+            opacity-0
+            group-hover:translate-y-0
+            group-hover:opacity-100
+            transition-all
+            duration-500
+            bg-white
+            px-5
+            py-3
+            flex
+            items-center
+            gap-2
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#514064]
+            whitespace-nowrap
+          "
+        >
+          View Piece
+          <ArrowUpRight size={13} />
         </div>
+      </div>
 
-        {/* DETAILS */}
+      {/* DETAILS */}
 
-        <div className="pt-5">
-          <div
-            className="
-              flex
-              justify-between
-              gap-3
-            "
-          >
-            <div>
-              <h3
-                className="
-                  font-['Cormorant_Garamond']
-                  text-2xl
-                  md:text-[27px]
-                  leading-none
-                  text-[#514064]
-                "
-              >
-                {product.productName}
-              </h3>
-
-              <p
-                className="
-                  mt-2
-                  text-[10px]
-                  uppercase
-                  tracking-[2px]
-                  text-[#968BA0]
-                "
-              >
-                {product.category}
-              </p>
-            </div>
+      <div className="pt-5">
+        <div className="flex justify-between gap-3">
+          <div>
+            <h3
+              className="
+                font-['Cormorant_Garamond']
+                text-2xl
+                md:text-[27px]
+                leading-none
+                text-[#514064]
+              "
+            >
+              {product.productName}
+            </h3>
 
             <p
               className="
-                text-sm
-                font-medium
-                text-[#806298]
-                whitespace-nowrap
+                mt-2
+                text-[10px]
+                uppercase
+                tracking-[2px]
+                text-[#968BA0]
               "
             >
-              Rs.{" "}
-              {Number(
-                product.price || 0
-              ).toLocaleString()}
+              {product.category}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() =>
-              navigate(
-                `/product/${product._id}`
-              )
-            }
+          <p
             className="
-              mt-5
-              text-[9px]
-              uppercase
-              tracking-[3px]
-              text-[#665875]
-              border-b
-              border-[#B48CF0]
-              pb-1
-              hover:text-[#B48CF0]
-              transition
+              text-sm
+              font-medium
+              text-[#806298]
+              whitespace-nowrap
             "
           >
-            Discover Piece
-          </button>
+            Rs. {Number(product.price || 0).toLocaleString()}
+          </p>
         </div>
-      </motion.article>
-    </>
+
+        <button
+          type="button"
+          onClick={() => navigate(`/product/${product._id}`)}
+          className="
+            mt-5
+            text-[9px]
+            uppercase
+            tracking-[3px]
+            text-[#665875]
+            border-b
+            border-[#B48CF0]
+            pb-1
+            hover:text-[#B48CF0]
+            transition
+          "
+        >
+          Discover Piece
+        </button>
+      </div>
+    </motion.article>
   );
 }

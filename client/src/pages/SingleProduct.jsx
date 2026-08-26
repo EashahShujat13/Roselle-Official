@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,6 +13,10 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
+
+import LoadingSpinner from "../components/common/LoadingSpinner";
+
 import { getSingleProduct } from "../config/apis/productApi";
 
 import {
@@ -26,6 +30,7 @@ export default function SingleProduct() {
   const navigate = useNavigate();
 
   const { addToCart } = useCart();
+  const { showToast } = useToast();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +40,6 @@ export default function SingleProduct() {
 
   const [liked, setLiked] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [wishlistMessage, setWishlistMessage] = useState("");
 
   // =========================
   // FETCH PRODUCT
@@ -85,14 +89,12 @@ export default function SingleProduct() {
 
         setLiked(isSaved);
       } catch (error) {
-        console.log(
-          "Wishlist Status Error:",
-          error
-        );
+        console.log("Wishlist Status Error:", error);
 
         if (error.response?.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
+
           setLiked(false);
         }
       }
@@ -119,23 +121,20 @@ export default function SingleProduct() {
 
     try {
       setWishlistLoading(true);
-      setWishlistMessage("");
 
       if (liked) {
         await removeFromWishlist(id, token);
 
         setLiked(false);
-        setWishlistMessage("Removed from wishlist");
+
+        showToast("Removed from wishlist");
       } else {
         await addToWishlist(id, token);
 
         setLiked(true);
-        setWishlistMessage("Added to wishlist");
-      }
 
-      setTimeout(() => {
-        setWishlistMessage("");
-      }, 2500);
+        showToast("Added to wishlist");
+      }
     } catch (error) {
       console.log("Wishlist Toggle Error:", error);
 
@@ -147,14 +146,11 @@ export default function SingleProduct() {
         return;
       }
 
-      setWishlistMessage(
+      showToast(
         error.response?.data?.message ||
-          "Unable to update wishlist"
+          "Unable to update wishlist",
+        "error"
       );
-
-      setTimeout(() => {
-        setWishlistMessage("");
-      }, 2500);
     } finally {
       setWishlistLoading(false);
     }
@@ -167,25 +163,10 @@ export default function SingleProduct() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#FCFAFF]">
-        <div className="max-w-7xl mx-auto px-6 py-20">
-          <div className="grid lg:grid-cols-2 gap-14">
-            <div className="aspect-[4/5] bg-[#EEE6F5] animate-pulse" />
-
-            <div className="py-10 space-y-6">
-              <div className="h-3 w-32 bg-[#E9DFF2] animate-pulse" />
-
-              <div className="h-14 w-3/4 bg-[#E9DFF2] animate-pulse" />
-
-              <div className="h-5 w-32 bg-[#E9DFF2] animate-pulse" />
-
-              <div className="h-px bg-[#E9DFF2]" />
-
-              <div className="h-20 w-full bg-[#E9DFF2] animate-pulse" />
-
-              <div className="h-14 w-full bg-[#E9DFF2] animate-pulse" />
-            </div>
-          </div>
-        </div>
+        <LoadingSpinner
+          fullScreen
+          text="Discovering your piece"
+        />
       </main>
     );
   }
@@ -202,9 +183,14 @@ export default function SingleProduct() {
             Roselle
           </p>
 
-          <h1 className="mt-4 font-['Cormorant_Garamond'] text-5xl text-[#514064]">
+          <h1 className="mt-4 font-['Cormorant_Garamond'] text-5xl md:text-6xl text-[#514064]">
             Piece not found
           </h1>
+
+          <p className="mt-4 text-sm text-[#81768D]">
+            The piece you're looking for may no longer be
+            available.
+          </p>
 
           <button
             type="button"
@@ -251,7 +237,6 @@ export default function SingleProduct() {
         ];
 
   const isOutOfStock = stock === 0;
-
   const isMaxQuantity = quantity >= stock;
 
   // =========================
@@ -285,8 +270,7 @@ export default function SingleProduct() {
   const previousImage = () => {
     setSelectedImage(
       (prev) =>
-        (prev - 1 + images.length) %
-        images.length
+        (prev - 1 + images.length) % images.length
     );
   };
 
@@ -297,67 +281,26 @@ export default function SingleProduct() {
   const handleAddToCart = () => {
     if (isOutOfStock) return;
 
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/auth");
+      return;
+    }
+
     addToCart(product, quantity);
+
+    showToast(
+      `${quantity} ${
+        quantity === 1 ? "piece" : "pieces"
+      } added to your bag`
+    );
 
     navigate("/cart");
   };
 
   return (
     <main className="min-h-screen bg-[#FCFAFF]">
-
-      {/* =========================
-          WISHLIST TOAST
-      ========================= */}
-
-      <AnimatePresence>
-        {wishlistMessage && (
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: -15,
-              scale: 0.96,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-            }}
-            exit={{
-              opacity: 0,
-              y: -15,
-              scale: 0.96,
-            }}
-            transition={{
-              duration: 0.25,
-            }}
-            className="
-              fixed
-              top-24
-              right-6
-              z-[100]
-              flex
-              items-center
-              gap-3
-              bg-[#5E4B7A]
-              text-white
-              px-5
-              py-3
-              shadow-lg
-              text-[10px]
-              uppercase
-              tracking-[2px]
-            "
-          >
-            <Heart
-              size={14}
-              fill="currentColor"
-              className="text-[#D7B7FF]"
-            />
-
-            {wishlistMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* =========================
           BACK BUTTON
@@ -399,7 +342,9 @@ export default function SingleProduct() {
       <section className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
         <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-20">
 
-          {/* GALLERY */}
+          {/* =========================
+              GALLERY
+          ========================= */}
 
           <motion.div
             initial={{ opacity: 0, x: -35 }}
@@ -412,9 +357,10 @@ export default function SingleProduct() {
 
               <div className="flex flex-col gap-3">
                 {images.map((image, index) => (
-                  <button
+                  <motion.button
                     type="button"
                     key={`${image}-${index}`}
+                    whileTap={{ scale: 0.96 }}
                     onClick={() =>
                       setSelectedImage(index)
                     }
@@ -423,11 +369,12 @@ export default function SingleProduct() {
                       overflow-hidden
                       bg-[#EDE5F5]
                       border
-                      transition
+                      transition-all
+                      duration-300
                       ${
                         selectedImage === index
-                          ? "border-[#9B72D0]"
-                          : "border-transparent"
+                          ? "border-[#9B72D0] shadow-[0_4px_18px_rgba(94,75,122,0.10)]"
+                          : "border-transparent hover:border-[#DCCFE8]"
                       }
                     `}
                   >
@@ -440,9 +387,12 @@ export default function SingleProduct() {
                         w-full
                         h-full
                         object-cover
+                        transition-transform
+                        duration-500
+                        hover:scale-105
                       "
                     />
-                  </button>
+                  </motion.button>
                 ))}
               </div>
 
@@ -454,6 +404,7 @@ export default function SingleProduct() {
                   aspect-[4/5]
                   overflow-hidden
                   bg-[#EDE5F5]
+                  shadow-[0_15px_50px_rgba(81,64,100,0.06)]
                 "
               >
                 <motion.img
@@ -487,12 +438,14 @@ export default function SingleProduct() {
                       top-5
                       left-5
                       bg-white/95
+                      backdrop-blur-sm
                       px-4
                       py-2
                       text-[8px]
                       uppercase
                       tracking-[3px]
                       text-[#514064]
+                      shadow-sm
                     "
                   >
                     Featured
@@ -519,13 +472,15 @@ export default function SingleProduct() {
                     h-11
                     rounded-full
                     bg-white/95
+                    backdrop-blur-sm
                     flex
                     items-center
                     justify-center
                     text-[#514064]
                     hover:text-[#B48CF0]
+                    hover:shadow-md
                     disabled:opacity-60
-                    transition
+                    transition-all
                   "
                 >
                   {wishlistLoading ? (
@@ -549,9 +504,11 @@ export default function SingleProduct() {
 
                 {images.length > 1 && (
                   <>
-                    <button
+                    <motion.button
                       type="button"
+                      whileTap={{ scale: 0.9 }}
                       onClick={previousImage}
+                      aria-label="Previous image"
                       className="
                         absolute
                         bottom-5
@@ -560,21 +517,24 @@ export default function SingleProduct() {
                         h-10
                         rounded-full
                         bg-white/90
+                        backdrop-blur-sm
                         flex
                         items-center
                         justify-center
                         text-[#514064]
                         hover:bg-[#B48CF0]
                         hover:text-white
-                        transition
+                        transition-all
                       "
                     >
                       <ArrowLeft size={16} />
-                    </button>
+                    </motion.button>
 
-                    <button
+                    <motion.button
                       type="button"
+                      whileTap={{ scale: 0.9 }}
                       onClick={nextImage}
+                      aria-label="Next image"
                       className="
                         absolute
                         bottom-5
@@ -583,24 +543,57 @@ export default function SingleProduct() {
                         h-10
                         rounded-full
                         bg-white/90
+                        backdrop-blur-sm
                         flex
                         items-center
                         justify-center
                         text-[#514064]
                         hover:bg-[#B48CF0]
                         hover:text-white
-                        transition
+                        transition-all
                       "
                     >
                       <ArrowRight size={16} />
-                    </button>
+                    </motion.button>
                   </>
+                )}
+
+                {/* IMAGE COUNTER */}
+
+                {images.length > 1 && (
+                  <div
+                    className="
+                      absolute
+                      bottom-5
+                      left-1/2
+                      -translate-x-1/2
+                      bg-[#514064]/80
+                      backdrop-blur-sm
+                      text-white
+                      px-3
+                      py-1.5
+                      text-[8px]
+                      tracking-[2px]
+                    "
+                  >
+                    {String(selectedImage + 1).padStart(
+                      2,
+                      "0"
+                    )}
+                    {" / "}
+                    {String(images.length).padStart(
+                      2,
+                      "0"
+                    )}
+                  </div>
                 )}
               </div>
             </div>
           </motion.div>
 
-          {/* PRODUCT INFORMATION */}
+          {/* =========================
+              PRODUCT INFORMATION
+          ========================= */}
 
           <motion.div
             initial={{
@@ -617,6 +610,8 @@ export default function SingleProduct() {
             }}
             className="flex flex-col justify-center"
           >
+            {/* CATEGORY */}
+
             <p
               className="
                 uppercase
@@ -628,6 +623,8 @@ export default function SingleProduct() {
               {product.category ||
                 "Roselle Jewellery"}
             </p>
+
+            {/* PRODUCT NAME */}
 
             <h1
               className="
@@ -643,6 +640,8 @@ export default function SingleProduct() {
               {product.productName}
             </h1>
 
+            {/* DIVIDER */}
+
             <div
               className="
                 mt-7
@@ -651,6 +650,8 @@ export default function SingleProduct() {
                 bg-[#B48CF0]
               "
             />
+
+            {/* PRICE */}
 
             <p
               className="
@@ -665,6 +666,8 @@ export default function SingleProduct() {
                 product.price || 0
               ).toLocaleString()}
             </p>
+
+            {/* DESCRIPTION */}
 
             {product.description && (
               <p
@@ -757,6 +760,7 @@ export default function SingleProduct() {
                     whileTap={{ scale: 0.9 }}
                     onClick={decreaseQuantity}
                     disabled={quantity <= 1}
+                    aria-label="Decrease quantity"
                     className="
                       w-12
                       h-full
@@ -789,6 +793,7 @@ export default function SingleProduct() {
                     whileTap={{ scale: 0.9 }}
                     onClick={increaseQuantity}
                     disabled={isMaxQuantity}
+                    aria-label="Increase quantity"
                     className="
                       w-12
                       h-full
@@ -824,7 +829,11 @@ export default function SingleProduct() {
 
             <motion.button
               type="button"
-              whileHover={{ y: -2 }}
+              whileHover={{
+                y: -2,
+                boxShadow:
+                  "0 12px 30px rgba(94,75,122,0.18)",
+              }}
               whileTap={{ scale: 0.98 }}
               disabled={isOutOfStock}
               onClick={handleAddToCart}
@@ -843,7 +852,7 @@ export default function SingleProduct() {
                 hover:bg-[#806298]
                 disabled:opacity-40
                 disabled:cursor-not-allowed
-                transition
+                transition-all
               "
             >
               <ShoppingBag size={16} />
@@ -863,7 +872,8 @@ export default function SingleProduct() {
               className="
                 mt-10
                 grid
-                grid-cols-2
+                grid-cols-1
+                sm:grid-cols-2
                 gap-4
               "
             >
@@ -873,6 +883,11 @@ export default function SingleProduct() {
                   border-[#E5DCEA]
                   p-5
                   bg-white/60
+                  backdrop-blur-sm
+                  transition-all
+                  duration-300
+                  hover:border-[#CDB8E2]
+                  hover:-translate-y-1
                 "
               >
                 <Sparkles
@@ -910,6 +925,11 @@ export default function SingleProduct() {
                   border-[#E5DCEA]
                   p-5
                   bg-white/60
+                  backdrop-blur-sm
+                  transition-all
+                  duration-300
+                  hover:border-[#CDB8E2]
+                  hover:-translate-y-1
                 "
               >
                 <Heart
@@ -945,7 +965,9 @@ export default function SingleProduct() {
         </div>
       </section>
 
-      {/* STORY STRIP */}
+      {/* =========================
+          STORY STRIP
+      ========================= */}
 
       <section
         className="
@@ -966,7 +988,12 @@ export default function SingleProduct() {
             text-center
           "
         >
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <p
               className="
                 font-['Cormorant_Garamond']
@@ -987,9 +1014,17 @@ export default function SingleProduct() {
             >
               Jewellery designed around individuality.
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{
+              duration: 0.5,
+              delay: 0.1,
+            }}
+          >
             <p
               className="
                 font-['Cormorant_Garamond']
@@ -1010,9 +1045,17 @@ export default function SingleProduct() {
             >
               Pieces created to become part of your story.
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{
+              duration: 0.5,
+              delay: 0.2,
+            }}
+          >
             <p
               className="
                 font-['Cormorant_Garamond']
@@ -1033,7 +1076,7 @@ export default function SingleProduct() {
             >
               Colour, texture and timeless beauty.
             </p>
-          </div>
+          </motion.div>
         </div>
       </section>
     </main>

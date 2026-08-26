@@ -12,8 +12,11 @@ import {
 import { useState } from "react";
 
 import { signupUser } from "../../config/apis/authApi";
+import { useToast } from "../../context/ToastContext";
 
 export default function SignupForm() {
+  const { showToast } = useToast();
+
   const [showPassword, setShowPassword] =
     useState(false);
 
@@ -45,7 +48,10 @@ export default function SignupForm() {
       signupData.password !==
       signupData.confirmPassword
     ) {
-      alert("Passwords do not match");
+      showToast(
+        "Passwords do not match",
+        "error"
+      );
       return;
     }
 
@@ -58,7 +64,11 @@ export default function SignupForm() {
         password: signupData.password,
       });
 
-      alert(response.message);
+      showToast(
+        response.message ||
+          "Account created successfully.",
+        "success"
+      );
 
       setSignupData({
         fullname: "",
@@ -67,9 +77,10 @@ export default function SignupForm() {
         confirmPassword: "",
       });
     } catch (error) {
-      alert(
+      showToast(
         error.response?.data?.message ||
-          "Signup Failed"
+          "Signup Failed",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -101,22 +112,22 @@ export default function SignupForm() {
       onSubmit={handleSubmit}
       className="space-y-4"
     >
-
       {/* Full Name */}
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           Full Name
         </label>
 
         <div className="relative">
-
           <FiUser
             size={17}
             className="
@@ -137,25 +148,25 @@ export default function SignupForm() {
             className={inputClass}
             required
           />
-
         </div>
       </div>
 
       {/* Email */}
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           Email Address
         </label>
 
         <div className="relative">
-
           <FiMail
             size={17}
             className="
@@ -176,25 +187,25 @@ export default function SignupForm() {
             className={inputClass}
             required
           />
-
         </div>
       </div>
 
       {/* Password */}
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           Password
         </label>
 
         <div className="relative">
-
           <FiLock
             size={17}
             className="
@@ -223,9 +234,7 @@ export default function SignupForm() {
           <button
             type="button"
             onClick={() =>
-              setShowPassword(
-                !showPassword
-              )
+              setShowPassword(!showPassword)
             }
             className="
               absolute
@@ -242,25 +251,25 @@ export default function SignupForm() {
               <Eye size={17} />
             )}
           </button>
-
         </div>
       </div>
 
       {/* Confirm Password */}
       <div>
-        <label className="
-          mb-2
-          block
-          text-[9px]
-          uppercase
-          tracking-[2px]
-          text-[#756982]
-        ">
+        <label
+          className="
+            mb-2
+            block
+            text-[9px]
+            uppercase
+            tracking-[2px]
+            text-[#756982]
+          "
+        >
           Confirm Password
         </label>
 
         <div className="relative">
-
           <FiLock
             size={17}
             className="
@@ -310,7 +319,6 @@ export default function SignupForm() {
               <Eye size={17} />
             )}
           </button>
-
         </div>
       </div>
 
@@ -340,6 +348,7 @@ export default function SignupForm() {
           hover:bg-[#806298]
           hover:shadow-[0_12px_30px_rgba(94,75,122,0.18)]
           disabled:opacity-60
+          disabled:cursor-not-allowed
         "
       >
         {loading
@@ -357,7 +366,6 @@ export default function SignupForm() {
           />
         )}
       </motion.button>
-
     </form>
   );
 }
