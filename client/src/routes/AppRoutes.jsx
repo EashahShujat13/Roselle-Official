@@ -34,6 +34,11 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminProducts from "../pages/Admin/AdminProducts";
 import AdminOrders from "../pages/Admin/AdminOrders";
 import AdminCustomers from "../pages/Admin/AdminCustomers";
+import AdminCategories from "../pages/Admin/AdminCategories";
+import AdminAnalytics from "../pages/Admin/AdminAnalytics";
+import AdminCoupons from "../pages/Admin/AdminCoupons";
+
+
 
 
 export default function AppRoutes() {
@@ -158,6 +163,20 @@ export default function AppRoutes() {
       <Route path="customers"
        element={<AdminCustomers />}
       />
+
+      <Route path="categories"
+        element={<AdminCategories />}
+      />
+
+      <Route path="analytics"
+       element={<AdminAnalytics />}
+      />
+
+      <Route path="coupons"
+       element={<AdminCoupons />}
+      />
+
+    
 </Route>
 
 

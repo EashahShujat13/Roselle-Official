@@ -28,7 +28,7 @@ const navSections = [
     label: "Store",
     items: [
       { name: "Categories", path: "/admin/categories", icon: Tags },
-      { name: "Reviews", path: "/admin/reviews", icon: Star },
+    //   { name: "Reviews", path: "/admin/reviews", icon: Star },
     ],
   },
   {
