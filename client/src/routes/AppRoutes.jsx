@@ -32,6 +32,8 @@ import NotFound from "../pages/NotFound";
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminProducts from "../pages/Admin/AdminProducts";
+import AdminOrders from "../pages/Admin/AdminOrders";
+import AdminCustomers from "../pages/Admin/AdminCustomers";
 
 
 export default function AppRoutes() {
@@ -147,6 +149,14 @@ export default function AppRoutes() {
 
       <Route path="products"
        element={<AdminProducts />}
+      />
+
+      <Route path="orders"
+       element={<AdminOrders />}
+      />
+
+      <Route path="customers"
+       element={<AdminCustomers />}
       />
 </Route>
 
