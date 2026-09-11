@@ -130,3 +130,51 @@ Usme seekhenge:
 Ye sab interview-level concepts hain.
 
 sb hogya category k bss ui rehti h
+
+client/src/
+│
+├── components/
+│   │
+│   ├── Admin/
+│   │   ├── AdminLayout.jsx
+│   │   ├── AdminSidebar.jsx
+│   │   ├── AdminHeader.jsx
+│   │   │
+│   │   ├── Dashboard/
+│   │   │   ├── StatCard.jsx
+│   │   │   ├── RevenueChart.jsx
+│   │   │   ├── TopProducts.jsx
+│   │   │   ├── RecentOrders.jsx
+│   │   │   └── StorePulse.jsx
+│   │   │
+│   │   ├── Products/
+│   │   ├── Orders/
+│   │   └── Customers/
+│   │
+│   └── ...your existing components
+│
+├── config/
+│   └── apis/
+│       ├── authApi.js
+│       ├── categoryApi.js
+│       ├── orderApi.js
+│       ├── productApi.js
+│       ├── wishlistApi.js
+│       └── adminApi.js       ← later if needed
+│
+├── pages/
+│   │
+│   ├── Admin/
+│   │   ├── AdminDashboard.jsx
+│   │   ├── AdminProducts.jsx
+│   │   ├── AdminOrders.jsx
+│   │   ├── AdminCustomers.jsx
+│   │   ├── AdminCategories.jsx
+│   │   ├── AdminReviews.jsx
+│   │   ├── AdminAnalytics.jsx
+│   │   └── AdminSettings.jsx
+│   │
+│   └── ...your existing pages
+│
+└── routes/
+    └── AppRoutes.jsx
