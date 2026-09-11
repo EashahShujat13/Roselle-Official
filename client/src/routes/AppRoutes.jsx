@@ -28,6 +28,12 @@ import ShippingReturns from "../pages/ShippingReturns";
 // Fallback
 import NotFound from "../pages/NotFound";
 
+// Admin Pages
+import AdminLayout from "../components/Admin/AdminLayout";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
+import AdminProducts from "../pages/Admin/AdminProducts";
+
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -125,6 +131,25 @@ export default function AppRoutes() {
         path="/shipping-returns"
         element={<ShippingReturns />}
       />
+
+      
+      {/* =========================
+          ADMIN PAGES
+      ========================= */}
+    <Route 
+    path="/admin" 
+    element={<AdminLayout />}
+    >
+
+      <Route index 
+      element={<AdminDashboard />} 
+      />
+
+      <Route path="products"
+       element={<AdminProducts />}
+      />
+</Route>
+
 
       {/* =========================
           404
