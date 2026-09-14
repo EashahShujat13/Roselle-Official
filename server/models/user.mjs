@@ -41,6 +41,11 @@ provider: {
     enum: ["local", "google"],
     default: "local",
 },
+role: {
+    type: String,
+    enum: ["customer", "admin"],
+    default: "customer",
+},
 
 },{
     timestamps: true

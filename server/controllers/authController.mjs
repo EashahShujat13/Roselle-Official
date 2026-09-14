@@ -14,10 +14,9 @@ export  const getAllUsers = async(req,res)=>{
 
 export const signUp = async (req, res) => {
   try {
-    const { email, fullname } = req.body;
-
+    const { email, fullname, password } = req.body;
     // 1. create user
-    const user = new Users(req.body);
+    const user = new Users({ email, fullname, password });
     await user.save();
 
     // 2. send email (DON'T block signup if email fails)
@@ -144,7 +143,16 @@ export const login = async(req,res)=>{
     user.tokens.push(token)
     await user.save()
 
-    res.send({ message: 'User logged in successfully!',token })
+    res.send({
+  message: 'User logged in successfully!',
+  token,
+  user: {
+    _id: user._id,
+    fullname: user.fullname,
+    email: user.email,
+    role: user.role,
+  },
+});
 }
     catch(e){
         res.status(404).send({message:"token error",error:e.message})

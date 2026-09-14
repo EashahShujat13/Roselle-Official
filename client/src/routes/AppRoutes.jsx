@@ -38,7 +38,7 @@ import AdminCategories from "../pages/Admin/AdminCategories";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminCoupons from "../pages/Admin/AdminCoupons";
 import AdminSettings from "../pages/Admin/AdminSettings";
-
+import ProtectedAdminRoute from "../components/Admin/ProtectedAdminRoute";
 
 
 
@@ -144,10 +144,14 @@ export default function AppRoutes() {
       {/* =========================
           ADMIN PAGES
       ========================= */}
-    <Route 
-    path="/admin" 
-    element={<AdminLayout />}
-    >
+    <Route
+        path="/admin"
+        element={
+          <ProtectedAdminRoute>
+          <AdminLayout />
+          </ProtectedAdminRoute>
+          }
+      >
 
       <Route index 
       element={<AdminDashboard />} 
