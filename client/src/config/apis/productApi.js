@@ -34,3 +34,24 @@ export const getSingleProduct = async (id) => {
   const response = await axiosInstance.get(`/product/${id}`);
   return response.data;
 };
+
+export const addProduct = async (productData, token) => {
+  const response = await axiosInstance.post("/product/add", productData, {
+    headers: { Authorization: token },
+  });
+  return response.data;
+};
+
+export const updateProduct = async (id, productData, token) => {
+  const response = await axiosInstance.put(`/product/${id}`, productData, {
+    headers: { Authorization: token },
+  });
+  return response.data;
+};
+
+export const deleteProduct = async (id, token) => {
+  const response = await axiosInstance.delete(`/product/${id}`, {
+    headers: { Authorization: token },
+  });
+  return response.data;
+};
