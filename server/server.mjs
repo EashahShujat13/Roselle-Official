@@ -8,6 +8,7 @@ import productRoutes from "./routes/productRoutes.mjs";
 import categoryRoutes from "./routes/categoryRoutes.mjs";
 import orderRoutes from "./routes/orderRoutes.mjs";
 import wishlistRoutes from "./routes/wishlistRoutes.mjs";
+import adminRoutes from "./routes/adminRoutes.mjs"
 
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/product", productRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Local development
 // if (process.env.NODE_ENV !== "production") {
