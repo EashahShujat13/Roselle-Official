@@ -50,7 +50,7 @@ export const getDashboardStats = async (req, res) => {
   try {
     // Step 1: grab everything we need from the database, once.
     const orders = await Order.find().sort({ createdAt: -1 });
-    const totalCustomers = await Users.countDocuments({ role: "customer" });
+    const totalCustomers = await Users.countDocuments({ role: { $ne: "admin" } });
 
     // Step 2: total revenue = sum of every order's "total" field.
     // We skip Cancelled orders — money from a cancelled order shouldn't count as earned revenue.
@@ -120,6 +120,24 @@ export const getDashboardStats = async (req, res) => {
     });
   } catch (e) {
     console.log("DASHBOARD STATS ERROR:", e);
+    res.status(500).send({ message: e.message });
+  }
+};
+
+// TEMPORARY - ek dafa run karo, phir yeh function aur iski route delete kar dena
+export const backfillUserRoles = async (req, res) => {
+  try {
+    const result = await Users.updateMany(
+      { role: { $exists: false } }, // jin users ke paas role field bilkul nahi hai unhein dhoondo
+      { $set: { role: "customer" } } // unhein default value de do
+    );
+
+    res.send({
+      message: "Backfill complete",
+      matched: result.matchedCount,
+      modified: result.modifiedCount,
+    });
+  } catch (e) {
     res.status(500).send({ message: e.message });
   }
 };
