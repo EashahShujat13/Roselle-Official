@@ -3,18 +3,20 @@ import Products from "../models/product.mjs";
 // Add Product
 export const addProduct = async (req, res) => {
   try {
-    const product = new Products(req.body);
+    // req.files comes from Multer, added by upload.array("images", 5) in the route.
+    // Each file object's .path is already the final Cloudinary URL —
+    // multer-storage-cloudinary fills that in automatically during upload.
+    const imageUrls = req.files ? req.files.map((file) => file.path) : [];
+
+    const product = new Products({
+      ...req.body,
+      images: imageUrls,
+    });
 
     await product.save();
-
-    res.status(201).send({
-      message: "Product Added Successfully",
-      product,
-    });
+    res.status(201).send({ message: "Product Added Successfully", product });
   } catch (e) {
-    res.status(500).send({
-      message: e.message,
-    });
+    res.status(500).send({ message: e.message });
   }
 };
 
@@ -39,30 +41,28 @@ export const getAllProducts = async (req, res) => {
 // Update Product
 export const updateProduct = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+
+    // Only overwrite images if the admin actually uploaded new ones this time —
+    // otherwise editing price/stock alone would wipe out the existing images.
+    if (req.files && req.files.length > 0) {
+      updateData.images = req.files.map((file) => file.path);
+    }
+
     const product = await Products.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      {
-        returnDocument: "after",
-        runValidators: true,
+      updateData,
+      { returnDocument: "after",
+         runValidators: true
       }
     );
 
     if (!product) {
-      return res.status(404).send({
-        message: "Product Not Found",
-      });
+      return res.status(404).send({ message: "Product Not Found" });
     }
-
-    res.send({
-      message: "Product Updated Successfully",
-      product,
-    });
-
+    res.send({ message: "Product Updated Successfully", product });
   } catch (e) {
-    res.status(500).send({
-      message: e.message,
-    });
+    res.status(500).send({ message: e.message });
   }
 };
 
