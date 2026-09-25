@@ -35,16 +35,21 @@ export const getSingleProduct = async (id) => {
   return response.data;
 };
 
-export const addProduct = async (productData, token) => {
-  const response = await axiosInstance.post("/product/add", productData, {
-    headers: { Authorization: token },
+export const addProduct = async (formData, token) => {
+  const response = await axiosInstance.post("/product/add", formData, {
+    headers: {
+      Authorization: token,
+    },
   });
   return response.data;
 };
 
-export const updateProduct = async (id, productData, token) => {
-  const response = await axiosInstance.put(`/product/${id}`, productData, {
-    headers: { Authorization: token },
+
+export const updateProduct = async (id, formData, token) => {
+  const response = await axiosInstance.put(`/product/${id}`, formData, {
+    headers: {
+      Authorization: token,
+    },
   });
   return response.data;
 };
