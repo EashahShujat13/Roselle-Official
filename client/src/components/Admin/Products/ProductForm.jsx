@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { getAllCategories } from "../../../config/apis/categoryApi";
 
+const MAX_IMAGES = 5;
+
 const emptyForm = {
   productName: "",
   price: "",
@@ -14,13 +16,14 @@ const emptyForm = {
 
 const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
   const [form, setForm] = useState(emptyForm);
-  const [imageFiles, setImageFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
+  const [existingImages, setExistingImages] = useState([]); // purani images (server URLs)
+  const [imageFiles, setImageFiles] = useState([]); // nayi images (File objects)
+  const [newPreviews, setNewPreviews] = useState([]); // nayi images ki preview URLs
   const [categories, setCategories] = useState([]);
   const [catLoading, setCatLoading] = useState(false);
   const [categoryError, setCategoryError] = useState("");
 
-  // Load categories each time the form opens, so newly added ones appear
+  // Categories load
   useEffect(() => {
     if (!open) return;
     const loadCategories = async () => {
@@ -38,6 +41,7 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
     loadCategories();
   }, [open]);
 
+  // Form reset / edit data load
   useEffect(() => {
     setForm(
       initialData
@@ -51,10 +55,17 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
           }
         : emptyForm
     );
+    setExistingImages(initialData?.images || []);
     setImageFiles([]);
-    setPreviewUrls(initialData?.images || []);
     setCategoryError("");
   }, [initialData, open]);
+
+  // Nayi files ki previews banana (aur memory cleanup)
+  useEffect(() => {
+    const urls = imageFiles.map((file) => URL.createObjectURL(file));
+    setNewPreviews(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [imageFiles]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -68,16 +79,26 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const merged = [...imageFiles, ...files].slice(0, 5);
-    setImageFiles(merged);
-    setPreviewUrls(merged.map((file) => URL.createObjectURL(file)));
-    e.target.value = ""; // allows picking the same file again if removed
+    const slotsLeft = MAX_IMAGES - existingImages.length - imageFiles.length;
+    setImageFiles([...imageFiles, ...files.slice(0, Math.max(slotsLeft, 0))]);
+    e.target.value = "";
   };
 
+  // Sab previews ek list mein: pehle purani, phir nayi
+  const allPreviews = [
+    ...existingImages.map((url) => ({ url, isNew: false })),
+    ...newPreviews.map((url) => ({ url, isNew: true })),
+  ];
+
   const removeImage = (index) => {
-    const updatedFiles = imageFiles.filter((_, i) => i !== index);
-    setImageFiles(updatedFiles);
-    setPreviewUrls(updatedFiles.map((file) => URL.createObjectURL(file)));
+    if (index < existingImages.length) {
+      // purani image hataani hai
+      setExistingImages(existingImages.filter((_, i) => i !== index));
+    } else {
+      // nayi image hataani hai
+      const newIndex = index - existingImages.length;
+      setImageFiles(imageFiles.filter((_, i) => i !== newIndex));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -95,12 +116,16 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
     data.append("category", form.category);
     data.append("description", form.description);
     data.append("isFeatured", form.isFeatured);
+
+    // Edit mein: backend ko batao kaun si purani images rakhni hain
+    if (initialData) {
+      data.append("existingImages", JSON.stringify(existingImages));
+    }
+
     imageFiles.forEach((file) => data.append("images", file));
     onSubmit(data);
   };
 
-  // If an existing product has a category that's no longer in the list
-  // (old typo, deleted category), still show it so it isn't silently lost.
   const categoryNames = categories.map((c) => c.categoryName);
   const orphanCategory =
     form.category && !categoryNames.includes(form.category) ? form.category : null;
@@ -167,12 +192,12 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
                 <label className={labelClass}>Product Images</label>
 
                 <div className="grid grid-cols-4 gap-2.5">
-                  {previewUrls.map((url, i) => (
+                  {allPreviews.map((img, i) => (
                     <div
-                      key={i}
+                      key={`${img.isNew ? "new" : "old"}-${i}`}
                       className="relative aspect-square rounded-xl overflow-hidden group border border-[#EFE6F5]"
                     >
-                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      <img src={img.url} alt="" className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
@@ -183,7 +208,7 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
                     </div>
                   ))}
 
-                  {previewUrls.length < 5 && (
+                  {allPreviews.length < MAX_IMAGES && (
                     <label className="aspect-square rounded-xl border-2 border-dashed border-[#DFCEEF] flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-[#B48CF0] hover:bg-[#FAF6FE] transition-colors">
                       <ImagePlus className="w-4 h-4 text-[#B48CF0]" strokeWidth={1.75} />
                       <span className="text-[9px] text-[#B4A6C4] uppercase tracking-wide">Add</span>
@@ -200,7 +225,7 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
 
                 <p className="text-[11px] text-[#B4A6C4] mt-2.5">
                   {initialData
-                    ? "Upload new photos to replace the current ones, or leave as is to keep them."
+                    ? "Remove photos you don't want, or add new ones. Up to 5 photos in total."
                     : "Up to 5 photos — the first will be used as the primary image."}
                 </p>
               </div>
