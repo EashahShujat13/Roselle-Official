@@ -21,6 +21,7 @@ const AdminProducts = () => {
     try {
       setLoading(true);
       const res = await getAllProducts();
+      console.log("All products:", res.products);
       setProducts(res.products);
     } catch (e) {
       console.log("Failed to fetch products:", e);
@@ -75,7 +76,7 @@ const AdminProducts = () => {
   };
 
   const filteredProducts = products.filter((p) => {
-    const matchesSearch = p.productName.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = p.productName?.toLowerCase().includes(search.toLowerCase());
     const matchesTab =
       activeTab === "All" ||
       (activeTab === "Active" && p.stock > 5) ||
@@ -86,9 +87,9 @@ const AdminProducts = () => {
 
   const tableRows = filteredProducts.map((p) => ({
     id: p._id,
-    name: p.productName,
+    price: `Rs${(p.price || 0).toLocaleString()}`,
+    name: p.productName || "Unnamed Product",
     image: p.images?.[0] || null,
-    price: `Rs${p.price.toLocaleString()}`,
     stock: p.stock,
     status: p.stock === 0 ? "Out" : p.stock <= 5 ? "Low" : "Active",
     _raw: p,
