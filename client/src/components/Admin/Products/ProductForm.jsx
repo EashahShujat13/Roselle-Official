@@ -1,6 +1,7 @@
-import { X, ImagePlus, Sparkles, Trash2 } from "lucide-react";
+import { X, ImagePlus, Sparkles, Trash2, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { getAllCategories } from "../../../config/apis/categoryApi";
 
 const emptyForm = {
   productName: "",
@@ -15,6 +16,27 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
   const [form, setForm] = useState(emptyForm);
   const [imageFiles, setImageFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [catLoading, setCatLoading] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+
+  // Load categories each time the form opens, so newly added ones appear
+  useEffect(() => {
+    if (!open) return;
+    const loadCategories = async () => {
+      try {
+        setCatLoading(true);
+        const data = await getAllCategories();
+        setCategories(data.categories || []);
+      } catch (e) {
+        console.log("Failed to load categories:", e);
+        setCategories([]);
+      } finally {
+        setCatLoading(false);
+      }
+    };
+    loadCategories();
+  }, [open]);
 
   useEffect(() => {
     setForm(
@@ -31,11 +53,17 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
     );
     setImageFiles([]);
     setPreviewUrls(initialData?.images || []);
+    setCategoryError("");
   }, [initialData, open]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+  };
+
+  const selectCategory = (name) => {
+    setForm({ ...form, category: name });
+    setCategoryError("");
   };
 
   const handleImageChange = (e) => {
@@ -54,6 +82,12 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!form.category) {
+      setCategoryError("Please select a category.");
+      return;
+    }
+
     const data = new FormData();
     data.append("productName", form.productName);
     data.append("price", form.price);
@@ -65,10 +99,23 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
     onSubmit(data);
   };
 
+  // If an existing product has a category that's no longer in the list
+  // (old typo, deleted category), still show it so it isn't silently lost.
+  const categoryNames = categories.map((c) => c.categoryName);
+  const orphanCategory =
+    form.category && !categoryNames.includes(form.category) ? form.category : null;
+
   const inputClass =
     "w-full px-4 py-3 text-sm rounded-xl bg-[#FBF9FD] border border-[#EBE2F2] text-[#2A1F38] placeholder:text-[#B4A6C4] outline-none transition-all duration-200 focus:border-[#B48CF0] focus:bg-white focus:ring-4 focus:ring-[#B48CF0]/10";
 
   const labelClass = "mb-2 block text-[10px] font-medium uppercase tracking-[0.15em] text-[#8A7A9B]";
+
+  const chipClass = (selected) =>
+    `inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium border transition-all duration-150 ${
+      selected
+        ? "bg-[#7B5EA7] border-[#7B5EA7] text-white shadow-[0_4px_12px_rgba(107,69,149,0.25)]"
+        : "bg-[#FBF9FD] border-[#EBE2F2] text-[#6B5D7B] hover:border-[#B48CF0] hover:bg-[#FAF6FE]"
+    }`;
 
   return (
     <AnimatePresence>
@@ -105,6 +152,7 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
                   </h2>
                 </div>
                 <button
+                  type="button"
                   onClick={onClose}
                   className="mt-1 p-2 rounded-full text-[#B4A6C4] hover:text-[#5B3E85] hover:bg-[#F3EEF9] transition-colors"
                 >
@@ -203,17 +251,54 @@ const ProductForm = ({ open, onClose, onSubmit, initialData }) => {
                 </div>
               </div>
 
-              {/* Category */}
+              {/* Category — click to select */}
               <div>
                 <label className={labelClass}>Category</label>
-                <input
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
-                  placeholder="e.g. Earrings"
-                  required
-                  className={inputClass}
-                />
+
+                {catLoading ? (
+                  <div className="flex flex-wrap gap-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="h-8 w-20 rounded-full bg-[#F3EEF9] animate-pulse" />
+                    ))}
+                  </div>
+                ) : categories.length === 0 && !orphanCategory ? (
+                  <p className="text-xs text-[#9C8AB0] bg-[#FAF6FE] border border-dashed border-[#DFCEEF] rounded-xl px-4 py-3">
+                    No categories yet. Create one in the Categories page first.
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => {
+                      const selected = form.category === cat.categoryName;
+                      return (
+                        <button
+                          key={cat._id}
+                          type="button"
+                          onClick={() => selectCategory(cat.categoryName)}
+                          className={chipClass(selected)}
+                        >
+                          {selected && <Check className="w-3 h-3" strokeWidth={2.5} />}
+                          {cat.categoryName}
+                        </button>
+                      );
+                    })}
+
+                    {orphanCategory && (
+                      <button
+                        type="button"
+                        onClick={() => selectCategory(orphanCategory)}
+                        className={chipClass(true)}
+                        title="This category no longer exists in your category list"
+                      >
+                        <Check className="w-3 h-3" strokeWidth={2.5} />
+                        {orphanCategory} (not in list)
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {categoryError && (
+                  <p className="text-[11px] text-rose-500 mt-2">{categoryError}</p>
+                )}
               </div>
 
               {/* Description */}
