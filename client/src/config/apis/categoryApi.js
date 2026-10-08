@@ -6,7 +6,7 @@ export const getAllCategories = async () => {
 };
 
 export const createCategory = async (payload) => {
-  const response = await axiosInstance.post("/category", payload);
+  const response = await axiosInstance.post("/category/add", payload);
   return response.data;
 };
 
