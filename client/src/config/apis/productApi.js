@@ -39,21 +39,21 @@ export const addProduct = async (formData, token) => {
   const response = await axiosInstance.post("/product/add", formData, {
     headers: {
       Authorization: token,
+      "Content-Type": undefined,
     },
   });
   return response.data;
 };
-
 
 export const updateProduct = async (id, formData, token) => {
   const response = await axiosInstance.put(`/product/${id}`, formData, {
     headers: {
       Authorization: token,
+      "Content-Type": undefined,
     },
   });
   return response.data;
 };
-
 export const deleteProduct = async (id, token) => {
   const response = await axiosInstance.delete(`/product/${id}`, {
     headers: { Authorization: token },
