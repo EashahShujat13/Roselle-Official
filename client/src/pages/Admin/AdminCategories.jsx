@@ -7,7 +7,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-} from "../../api/categoryApi";
+} from "../../config/apis/categoryApi";
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
